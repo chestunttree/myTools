@@ -4,12 +4,19 @@ import * as vscode from 'vscode';
 import path from 'path';
 
 const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
-const i8nCodeRegExp = /\$tc\(['|"](.*?)['|"]\)/g;
-
+// /[\$t|\$tc](['|"](.*?)['|"])/
 
 // 当你的扩展被激活时，这个方法被调用
 // 你的扩展在第一次执行命令时被激活
 export function activate(context: vscode.ExtensionContext) {
+	/**获取 i18n方法名 */
+	const i18nApiName = vscode.workspace.getConfiguration('mytools.i18nTools').get<string[]>('apiName');
+
+	const i8nCodeRegExp = new RegExp(`(${i18nApiName?.join('|')})\\(['|"](.*?)['|"]\\)`, 'g');
+	// const i8nCodeRegExp = /[\$t|\$tc](['|"](.*?)['|"])/g
+	const i18nApiNameRegExp = new RegExp(`(${i18nApiName?.join('|')})\\('.*?'\\)`,'g');
+	// const i18nApiNameRegExp = /[\$t|\$tc]('.*?')/g;
+	console.log(`(${i18nApiName?.join('|')})\\(['|"](.*?)['|"]\\)`, `(${i18nApiName?.join('|')})\\('.*?'\\)`)
 	const i18nOptionsCatch = new Map<string, any>();
 	let statusBarItem: vscode.StatusBarItem;
 	let statusBarItemLoading:NodeJS.Timeout;
@@ -27,6 +34,14 @@ export function activate(context: vscode.ExtensionContext) {
 	// 现在使用registerCommand提供命令的实现
 	// commanddid参数必须与package.json中的命令字段匹配
 	let disposable = vscode.commands.registerCommand('mytools.i18n', () => {
+		if(!i18nApiName || !i18nApiName.length) {
+			return vscode.window.showErrorMessage('mytools.i18n 失败启动：i18nTools.apiName配置不能为空', { title: 'Open Settings' })
+			.then(selection => {
+				if (selection && selection.title === 'Open Settings') {
+					vscode.commands.executeCommand('workbench.action.openSettings', 'mytools.i18nTools.apiName');
+				}
+			});
+		}
 		if (isI18nReay) { return vscode.window.showInformationMessage('mytools.i18n 已启动'); }
 		isI18nReay = true;
 		readI18nOptionsfiles();
@@ -53,14 +68,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const i18nProvide = vscode.languages.registerHoverProvider(languages, {
 		provideHover(document, position, token) {
-			const range = document.getWordRangeAtPosition(position, /\$tc\('.*?'\)/g);
+			const range = document.getWordRangeAtPosition(position, i18nApiNameRegExp);
 			if (!range) { return Promise.reject(null); }
 			return new Promise((resolve, reject) => {
 				if (token.isCancellationRequested) {
 					reject(null);
 				} else {
 					const text = document.getText(range);
-					const i8nCode = text.replace(i8nCodeRegExp, '$1');
+					const i8nCode = text.replace(i8nCodeRegExp, '$2');
 					resolve(new vscode.Hover([
 						// new vscode.MarkdownString('### 国际化 '),
 						...transformI18nCodeToMarkdown(i8nCode)

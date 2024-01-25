@@ -32,6 +32,11 @@
           "type": "object",
           "default": {},
           "description": "i18n配置，: { [语言]: [配置文件路径] }"
+        },
+        "mytools.i18nTools.apiName": {
+          "type": "array",
+          "default": ["$tc"],
+          "description": "i18n方法名: 类似$t, 方法名有特殊字符的需要加上转义符=> '\\\\$t'"
         }
       }
     }
