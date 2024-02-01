@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import path from 'path';
 import apiName from './apiName';
 import { createHover } from './hoverProvider';
+import { ayncReadFile } from './fileLoad';
 
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
@@ -110,9 +111,18 @@ export function i18nInit(context: vscode.ExtensionContext) {
 		}
 		if(statusBarItem) animateStatusBarItem(false);
 	}
-	function loaderFile(filePath: string, relativePath: string) {
+	async function loaderFile(filePath: string, relativePath: string) {
 		if (filePath) {
 			delete require.cache[require.resolve(filePath)];
+
+			try {
+				const result = await ayncReadFile('d:\\myDemo\\fin-portal-web\\src\\common\\lang\\en-us1.js');
+				console.log('result',result)
+			} catch (error) {
+				console.log('error',error)		
+				console.error(error)		
+			}
+
 			i18nOptionsCatch.set(filePath.replace(/\\/g, '/'), {
 				content: require(filePath),
 				path: relativePath
