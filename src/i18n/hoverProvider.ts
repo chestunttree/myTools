@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import getCodesLine from './fileLoad';
 export function transformI18nCodeToMarkdown(code: string, i18nOptionsCatch:Map<string, any>) {
     const codes = code.split('.');
     const markdownArr: vscode.MarkdownString[] = [];
@@ -7,6 +8,8 @@ export function transformI18nCodeToMarkdown(code: string, i18nOptionsCatch:Map<s
             return result[key];
         }, item.content);
         const fileLink = `[修改](/${key})`;
+        const codeLineCount = getCodesLine(codes, item.path);
+        console.log(codeLineCount)
         markdownArr.push(new vscode.MarkdownString(` * <font size=2>${codeText}</font> <font color=#0000ff size=1>${fileLink}</font>`));
     });
     return markdownArr;

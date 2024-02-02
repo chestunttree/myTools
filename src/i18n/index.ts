@@ -114,12 +114,11 @@ export function i18nInit(context: vscode.ExtensionContext) {
 	async function loaderFile(filePath: string, relativePath: string) {
 		if (filePath) {
 			delete require.cache[require.resolve(filePath)];
-
+			console.log(relativePath, filePath, filePath.replace(/\\/g, '/'))
 			try {
-				const result = await ayncReadFile('d:\\myDemo\\fin-portal-web\\src\\common\\lang\\en-us1.js');
-				console.log('result',result)
+				await ayncReadFile(filePath, relativePath);
 			} catch (error) {
-				console.log('error',error)		
+				console.log('error',error)
 				console.error(error)		
 			}
 
