@@ -19,7 +19,7 @@ export async function ayncReadFile(path:string, relativePath:string){
 }
 async function validFileAccess(path: string) {
     try {
-        await access(path)
+        await access(path);
         return true;   
     } catch (error: any) {
         vscode.window.showErrorMessage(error.message);
@@ -28,6 +28,7 @@ async function validFileAccess(path: string) {
 }
 function codeStringParser(codeStr: string){
     return codeStr.split(wrapParserRegExp).reduce<CodeLineItem[]>((result,code, i)=>{
+        // 过滤 注释的代码
         if(/^\/\/.*/.test(code.trim())) return result;
         return [
             ...result,
