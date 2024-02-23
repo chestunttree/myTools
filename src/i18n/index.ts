@@ -8,10 +8,10 @@ import { ayncReadFile } from './fileLoad';
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function i18nInit(context: vscode.ExtensionContext) {
 
-    const { i8nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
+	const { i8nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
 	const i18nOptionsCatch = new Map<string, any>();
 	let statusBarItem: vscode.StatusBarItem;
-	let statusBarItemLoading:NodeJS.Timeout;
+	let statusBarItemLoading: NodeJS.Timeout;
 	let isFresh = true;
 	let isI18nReay = false;
 	/** 这里默认取第一个 workspace */
@@ -26,13 +26,14 @@ export function i18nInit(context: vscode.ExtensionContext) {
 	// 现在使用registerCommand提供命令的实现
 	// commanddid参数必须与package.json中的命令字段匹配
 	let disposable = vscode.commands.registerCommand('mytools.i18n', () => {
-		if(!i18nApiName || !i18nApiName.length) {
+		if (!i18nApiName || !i18nApiName.length) {
 			return vscode.window.showErrorMessage('mytools.i18n 失败启动：i18nTools.apiName配置不能为空', { title: 'Open Settings' })
-			.then(selection => {
-				if (selection && selection.title === 'Open Settings') {
-					vscode.commands.executeCommand('workbench.action.openSettings', 'mytools.i18nTools.apiName');
-				}
-			});
+				.then(selection => {
+					if (selection && selection.title === 'Open Settings') {
+						/** 打开 setting.json 设置插件 */
+						vscode.commands.executeCommand('workbench.action.openSettings', 'mytools.i18nTools.apiName');
+					}
+				});
 		}
 		if (isI18nReay) { return vscode.window.showInformationMessage('mytools.i18n 已启动'); }
 		isI18nReay = true;
@@ -52,7 +53,7 @@ export function i18nInit(context: vscode.ExtensionContext) {
 		context.subscriptions.push();
 	});
 
-	let disposableRefresh = vscode.commands.registerCommand('mytools.i18n.refresh',()=>{
+	let disposableRefresh = vscode.commands.registerCommand('mytools.i18n.refresh', () => {
 		readI18nOptionsfiles()
 	})
 	// readI18nOptionsfiles();
@@ -67,7 +68,9 @@ export function i18nInit(context: vscode.ExtensionContext) {
 					reject(null);
 				} else {
 					const text = document.getText(range);
-					const i8nCode = text.replace(i8nCodeRegExp, '$2');
+					let [i8nCode, i8nApiName] = text.replace(i8nCodeRegExp, '$2|$1').split('|');
+					const apiNameCheck = i18nApiName?.find((i)=> isArray(i)&& i8nApiName===i[0].replaceAll('/',''))
+					if(apiNameCheck) i8nCode = `${apiNameCheck[1]}.${i8nCode}`;
 					resolve((createHover(i8nCode, i18nOptionsCatch)));
 				}
 
@@ -97,7 +100,7 @@ export function i18nInit(context: vscode.ExtensionContext) {
 		}
 	}
 	async function readI18nOptionsfiles() {
-		if(statusBarItem) animateStatusBarItem(true);
+		if (statusBarItem) animateStatusBarItem(true);
 		const options = await getI18nOptionsConfiguration();
 		for (let languagesItem in options) {
 			const filePath = path.resolve(workspacePath, options[languagesItem]);
@@ -109,7 +112,7 @@ export function i18nInit(context: vscode.ExtensionContext) {
 		} else {
 			vscode.window.showInformationMessage('i18n 配置已更新!');
 		}
-		if(statusBarItem) animateStatusBarItem(false);
+		if (statusBarItem) animateStatusBarItem(false);
 	}
 	async function loaderFile(filePath: string, relativePath: string) {
 		if (filePath) {
@@ -118,8 +121,8 @@ export function i18nInit(context: vscode.ExtensionContext) {
 			try {
 				await ayncReadFile(filePath, relativePath);
 			} catch (error) {
-				console.log('error',error)
-				console.error(error)		
+				console.log('error', error)
+				console.error(error)
 			}
 
 			i18nOptionsCatch.set(filePath.replace(/\\/g, '/'), {
@@ -128,7 +131,7 @@ export function i18nInit(context: vscode.ExtensionContext) {
 			});
 		}
 	}
-	
+
 
 	function afterI18nOptionsChange() {
 		let changeFiles: string[] = [];
@@ -154,24 +157,24 @@ export function i18nInit(context: vscode.ExtensionContext) {
 			if (event.affectsConfiguration('mytools.i18nTools')) { readI18nOptionsfiles(); }
 		});
 	}
-	async function animateStatusBarItem(isRun:boolean) {
-		if(statusBarItemLoading!==undefined) clearTimeout(statusBarItemLoading);
-		if(!isRun) return;
+	async function animateStatusBarItem(isRun: boolean) {
+		if (statusBarItemLoading !== undefined) clearTimeout(statusBarItemLoading);
+		if (!isRun) return;
 		let counter = 0;
 		statusBarItemLoading = setInterval(() => {
 			switch (counter % 4) {
 				case 0:
 					statusBarItem.text = `$(sync~spin)`;
 					break;
-	
+
 				case 1:
 					statusBarItem.text = `$(sync~spin)`;
 					break;
-	
+
 				case 2:
 					statusBarItem.text = `$(sync~spin)`;
 					break;
-	
+
 				case 3:
 					statusBarItem.text = `$(sync~spin)`;
 					break;
@@ -185,4 +188,7 @@ export function i18nInit(context: vscode.ExtensionContext) {
 
 function isObj(target: any) {
 	return Object.prototype.toString.call(target) === '[object Object]';
+}
+function isArray(target: any) {
+	return Object.prototype.toString.call(target) === '[object Array]';
 }
