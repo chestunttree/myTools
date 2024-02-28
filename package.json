@@ -1,45 +1,23 @@
 {
-  "name": "mytools",
-  "displayName": "mytools",
-  "description": "myself tools",
-  "publisher": "my-publisher",
-  "version": "0.1.1",
+  "name": "ctools",
+  "displayName": "ctools",
+  "description": "",
+  "version": "0.0.1",
   "engines": {
     "vscode": "^1.54.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "*"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "mytools.i18n",
-        "title": "i18n show"
-      },
-      {
-        "command": "mytools.i18n.refresh",
-        "title": "i18n refresh"
+        "command": "ctools.helloWorld",
+        "title": "Hello World"
       }
-    ],
-    "configuration": {
-      "title": "myTools",
-      "properties": {
-        "mytools.i18nTools.options": {
-          "type": "object",
-          "default": {},
-          "description": "i18n配置，: { [语言]: [配置文件路径] }"
-        },
-        "mytools.i18nTools.apiName": {
-          "type": "array",
-          "default": ["$tc"],
-          "description": "i18n方法名: 类似$t, 方法名有特殊字符的需要加上转义符=> '\\\\$t'"
-        }
-      }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -50,18 +28,14 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/vscode": "^1.54.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
-    "@types/vscode": "^1.54.0",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
-    "@vscode/test-cli": "^0.0.6",
-    "@vscode/test-electron": "^2.3.9",
     "eslint": "^8.56.0",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "@types/lodash-es": "^4.17.12",
-    "lodash-es": "^4.17.21"
+    "typescript": "^5.3.3",
+    "@vscode/test-cli": "^0.0.6",
+    "@vscode/test-electron": "^2.3.9"
   }
 }

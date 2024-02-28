@@ -1,18 +1,31 @@
-# mytools README
-i18n 辅助插件
+# ctools README
+
+This is the README for your extension "ctools". After writing up a brief description, we recommend including the following sections.
+
 ## Features
 
-主要用以辅助开发者查看i18n对应Code在配置中的文本内容
+Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+
+For example if there is an image subfolder under your extension project workspace:
+
+\!\[feature X\]\(images/feature-x.png\)
+
+> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 ## Requirements
 
-安装完成后 需要配置mytools.i18nTools.options 才能正常运行
+If you have any requirements or dependencies, add a section describing those and how to install and configure them.
 
 ## Extension Settings
 
-* `mytools.i18nTools.options`: 配置一个object，键唯一， 值为配置的相对项目根目录的路径
-* `mytools.i18nTools.apiName`: 需要匹配的i18n方法名
-    - 例如：`"\\$t"`,`"\\$tcc"`,`"\\$tc"`,`"TC"`
+Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+
+For example:
+
+This extension contributes the following settings:
+
+* `myExtension.enable`: Enable/disable this extension.
+* `myExtension.thing`: Set to `blah` to do something.
 
 ## Known Issues
 
