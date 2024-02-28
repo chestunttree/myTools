@@ -3,9 +3,9 @@
   "displayName": "mytools",
   "description": "myself tools",
   "publisher": "my-publisher",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.54.0"
   },
   "categories": [
     "Other"
