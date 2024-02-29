@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 type ApinameItem = string | [string, string];
 export default function(){
     	/**获取 i18n方法名 */
-	const i18nApiName = vscode.workspace.getConfiguration('mytools.i18nTools').get<ApinameItem[]>('apiName');
+	const i18nApiName = vscode.workspace.getConfiguration('ctools.i18n').get<ApinameItem[]>('apiName');
     const i18nApiNameStrs = i18nApiName ? i18nApiName.map((item) => {
         if(Object.prototype.toString.call(item) === '[object Array]') return item[0];
         return item;

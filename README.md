@@ -6,12 +6,12 @@ i18n 辅助插件
 
 ## Requirements
 
-安装完成后 需要配置mytools.i18nTools.options 才能正常运行
+安装完成后 需要配置ctools.i18n.options 才能正常运行
 
 ## Extension Settings
 
-* `mytools.i18nTools.options`: 配置一个object，键唯一， 值为配置的相对项目根目录的路径
-* `mytools.i18nTools.apiName`: 需要匹配的i18n方法名
+* `ctools.i18n.options`: 配置一个object，键唯一， 值为配置的相对项目根目录的路径
+* `ctools.i18n.apiName`: 需要匹配的i18n方法名
     - 例如：`"\\$t"`,`"\\$tcc"`,`"\\$tc"`,`"TC"`
 
 ## Known Issues
