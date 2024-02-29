@@ -47,7 +47,7 @@ export function createI18nCommand() {
             }
         });
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('mytools.i18nTools')) { readI18nOptionsfiles(); }
+            if (event.affectsConfiguration('ctools.i18n')) { readI18nOptionsfiles(); }
         });
         readI18nOptionsfiles();
         vscode.window.showInformationMessage('mytools.i18n complete!');
@@ -76,18 +76,18 @@ export function createI18nCommand() {
     return [i18nCommand, statusBarItem, i18nProvide];
 
     async function getI18nOptionsConfiguration() {
-        let config = vscode.workspace.getConfiguration('mytools.i18nTools');
+        let config = vscode.workspace.getConfiguration('ctools.i18n');
         let options = config.get<Record<string, string>>('options');
         const validateOptions = options && isObj(options) && Object.keys(options).length > 0;
         let errorMessage = '';
-        if (!Boolean(options)) { errorMessage = 'i18n 配置文件路径未设置: mytools.i18nTools.options'; }
-        if (!isObj(options)) { errorMessage = 'mytools.i18nTools.option默认类型为Object: { [语言]: [配置文件路径] }'; }
-        if (!(options && Object.keys(options).length > 0)) { errorMessage = 'mytools.i18nTools.option不能为空对象'; }
+        if (!Boolean(options)) { errorMessage = 'i18n 配置文件路径未设置: ctools.i18n.options'; }
+        if (!isObj(options)) { errorMessage = 'ctools.i18n.option默认类型为Object: { [语言]: [配置文件路径] }'; }
+        if (!(options && Object.keys(options).length > 0)) { errorMessage = 'ctools.i18n.option不能为空对象'; }
         if (!validateOptions) {
             vscode.window.showErrorMessage(errorMessage, { title: 'Open Settings' })
                 .then(selection => {
                     if (selection && selection.title === 'Open Settings') {
-                        vscode.commands.executeCommand('workbench.action.openSettings', 'mytools.i18nTools.options');
+                        vscode.commands.executeCommand('workbench.action.openSettings', 'ctools.i18n.options');
                     }
                 });
             return Promise.reject('fails');
@@ -152,7 +152,7 @@ export function createI18nCommand() {
             }
         });
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('mytools.i18nTools')) { readI18nOptionsfiles(); }
+            if (event.affectsConfiguration('ctools.i18n')) { readI18nOptionsfiles(); }
         });
     }
     async function animateStatusBarItem(isRun: boolean) {
