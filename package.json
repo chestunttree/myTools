@@ -2,7 +2,7 @@
   "name": "ctools",
   "displayName": "ctools",
   "description": "my tools ",
-  "version": "0.0.2",
+  "version": "0.0.89",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -10,7 +10,11 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:vue",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -38,10 +42,12 @@
         },
         "ctools.i18n.apiName": {
           "type": "array",
-          "default": ["$tc"],
+          "default": [
+            "$tc"
+          ],
           "description": "i18n方法名: 类似$t, 方法名有特殊字符的需要加上转义符=> '\\\\$t'"
         }
-      }      
+      }
     }
   },
   "scripts": {
@@ -64,7 +70,9 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/lodash-es": "^4.17.12",
+    "lodash": "^4.17.21",
     "lodash-es": "^4.17.21"
   }
 }
