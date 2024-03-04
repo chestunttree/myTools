@@ -11,7 +11,7 @@ export default function(){
     /** 从匹配到的i18n调用代码中 获取code */
 	const i18nCodeRegExp = new RegExp(`(${i18nApiNameStrs?.join('|')})\\(['|"](.*?)['|"]\\)`, 'g');
     /** 匹配代码中 调用额i18n的代码段 */
-	const i18nApiNameRegExp = new RegExp(`(${i18nApiNameStrs?.join('|')})\\('.*?'\\)`,'g');
+	const i18nApiNameRegExp = new RegExp(`(${i18nApiNameStrs?.join('|')})\\(['|"].*?['|"]\\)`,'g');
 
     return {
         i18nApiName,
