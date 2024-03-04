@@ -6,7 +6,7 @@ import { createHover } from '../utils/hoverProvider';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand() {
-    const { i18nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
+    let { i18nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
     const i18nOptionsCatch = new Map<string, any>();
     let statusBarItem = createStatusBarItem();
     let statusBarItemLoading: NodeJS.Timeout;
@@ -47,7 +47,13 @@ export function createI18nCommand() {
             }
         });
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('ctools.i18n')) { readI18nOptionsfiles(); }
+            if (event.affectsConfiguration('ctools.i18n')) {
+                readI18nOptionsfiles();
+                const apiNameData = apiName();
+                i18nCodeRegExp = apiNameData.i18nCodeRegExp;
+                i18nApiNameRegExp = apiNameData.i18nApiNameRegExp;
+                i18nApiName = apiNameData.i18nApiName;
+            }
         });
         readI18nOptionsfiles();
         vscode.window.showInformationMessage('mytools.i18n complete!');
@@ -190,7 +196,7 @@ function createStatusBarItem() {
     let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     statusBarItem.text = `$(refresh)`; // 使用内置的图标
     statusBarItem.tooltip = 'Refresh I18n cache';
-    statusBarItem.command = 'mytools.i18n.refresh'; // 当点击图标时执行的命令
+    statusBarItem.command = 'ctools.i18n.refresh'; // 当点击图标时执行的命令
     statusBarItem.show(); // 让状态栏项显示出来
     return statusBarItem;
 }
