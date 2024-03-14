@@ -3,6 +3,7 @@ import apiName from '../utils/apiName';
 import path from 'path';
 import { ayncReadFile } from '../utils/fileLoad';
 import { createHover } from '../utils/hoverProvider';
+import { NotUndefined, PickPromiseReturn } from '../type';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand() {
@@ -113,35 +114,56 @@ export function createI18nCommand() {
     async function readI18nOptionsfiles() {
         if (statusBarItem) animateStatusBarItem(true);
         const options = await getI18nOptionsConfiguration();
-        for (let languagesItem in options) {
-            const filePath = path.resolve(workspacePath, options[languagesItem]);
-            loaderFile(filePath, options[languagesItem]);
-        }
-        if (isFresh) {
-            isFresh = false;
-            vscode.window.showInformationMessage('i18n 配置加载完成!');
+        const loaderRes = await filterConfigI18nOptions(options);
+        if(!loaderRes.length) {
+            vscode.window.showErrorMessage('ctools.i18n.option 请配置有效路径', { title: 'Open Settings' })
+                .then(selection => {
+                    if (selection && selection.title === 'Open Settings') {
+                        vscode.commands.executeCommand('workbench.action.openSettings', 'ctools.i18n.options');
+                    }
+                });
         } else {
-            vscode.window.showInformationMessage('i18n 配置已更新!');
+            loaderRes.forEach(({mapKey, content, path}) => i18nOptionsCatch.set(mapKey, {content, path}))
+            if (isFresh) {
+                isFresh = false;
+                vscode.window.showInformationMessage('i18n 配置加载完成!');
+            } else {
+                vscode.window.showInformationMessage('i18n 配置已更新!');
+            }
         }
         if (statusBarItem) animateStatusBarItem(false);
     }
     /** 加载文件 */
     async function loaderFile(filePath: string, relativePath: string) {
-        if (filePath) {
+        try {
+            filePath = await ayncReadFile(filePath, relativePath);
             delete require.cache[require.resolve(filePath)];
-            console.log(relativePath, filePath, filePath.replace(/\\/g, '/'))
-            try {
-                await ayncReadFile(filePath, relativePath);
-            } catch (error) {
-                console.log('error', error);
-                console.error(error);
-            }
-
-            i18nOptionsCatch.set(filePath.replace(/\\/g, '/'), {
-                content: require(filePath),
-                path: relativePath
-            });
+        } catch (error) {
+            return undefined;            
         }
+        // console.log(relativePath, filePath, filePath.replace(/\\/g, '/'));
+        // i18nOptionsCatch.set(filePath.replace(/\\/g, '/'), {
+        //     content: require(filePath),
+        //     path: relativePath
+        // });
+        return {
+            mapKey: filePath.replace(/\\/g, '/'),
+            content: require(filePath),
+            path: relativePath
+        };
+    }
+
+    /** 过滤出 可被被加载的I18n.options配置 */
+    type FilterI18nReturn = NonNullable<PickPromiseReturn<ReturnType<typeof loaderFile>>>[];
+    async function filterConfigI18nOptions(options: PickPromiseReturn<ReturnType<typeof getI18nOptionsConfiguration>>) {
+        const loaders:ReturnType<typeof loaderFile>[] = [];
+        for (let languagesItem in options) {
+            const filePath = path.resolve(workspacePath, options[languagesItem]);
+            loaders.push((loaderFile(filePath, options[languagesItem])))
+        }
+        const loadersRes = await Promise.all(loaders);
+        const r = loadersRes.filter(Boolean) as FilterI18nReturn;
+        return r;
     }
 
     function afterI18nOptionsChange() {
