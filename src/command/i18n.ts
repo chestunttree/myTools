@@ -58,6 +58,14 @@ export function createI18nCommand() {
         readI18nOptionsfiles();
         vscode.window.showInformationMessage('mytools.i18n complete!');
     });
+    const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh', () => {
+        if(!isI18nReay){
+            vscode.commands.executeCommand('ctools.i18n');
+            return;
+        }
+        readI18nOptionsfiles();
+    });
+
     /** i18n 调用代码块 hover Provide */
     const i18nProvide = vscode.languages.registerHoverProvider(languages, {
         provideHover(document, position, token) {
@@ -79,7 +87,7 @@ export function createI18nCommand() {
         }
     });
 
-    return [i18nCommand, statusBarItem, i18nProvide];
+    return [i18nCommand, i18nRefreshCommand, statusBarItem, i18nProvide];
 
     async function getI18nOptionsConfiguration() {
         let config = vscode.workspace.getConfiguration('ctools.i18n');
@@ -135,7 +143,6 @@ export function createI18nCommand() {
             });
         }
     }
-
 
     function afterI18nOptionsChange() {
         let changeFiles: string[] = [];
