@@ -22,19 +22,17 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+### 0.1.0
 
-Initial release of ...
+Initial release
 
-### 1.0.1
+### 0.1.3
 
-Fixed issue #.
+修复 i18n.refresh bug
 
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
+优化i18n.options配置读取
+* 文件路径后缀自动获取匹配 `.js`,`.ts`,`.json`
+* 无效路径报错提示，并引导配置
 
 ## Following extension guidelines
 
