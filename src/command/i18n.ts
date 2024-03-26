@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import apiName from '../utils/apiName';
 import path from 'path';
-import { ayncReadFile } from '../utils/fileLoad';
+import vm from 'vm';
+import { ayncReadFile, loadFile } from '../utils/fileLoad';
 import { createHover } from '../utils/hoverProvider';
-import { NotUndefined, PickPromiseReturn } from '../type';
+import { ModuleContext, NotUndefined, PickPromiseReturn } from '../type';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand() {
@@ -137,7 +138,7 @@ export function createI18nCommand() {
     async function loaderFile(filePath: string, relativePath: string) {
         try {
             filePath = await ayncReadFile(filePath, relativePath);
-            delete require.cache[require.resolve(filePath)];
+            // delete require.cache[require.resolve(filePath)];
         } catch (error) {
             return undefined;            
         }
@@ -146,11 +147,28 @@ export function createI18nCommand() {
         //     content: require(filePath),
         //     path: relativePath
         // });
-        return {
-            mapKey: filePath.replace(/\\/g, '/'),
-            content: require(filePath),
-            path: relativePath
-        };
+        let jsCode:string;
+        try {
+            jsCode = await loadFile(filePath).then(res=>res||'');
+            // console.log(jsCode);
+            const moduleContext:ModuleContext = { exports: {}, require, module:{exports: {}} };
+            vm.runInNewContext(jsCode, moduleContext);
+            const importedData = afterFileLoadGetDefaultReturn(moduleContext);
+            console.log(importedData, moduleContext);
+            return {
+                mapKey: filePath.replace(/\\/g, '/'),
+                content: importedData,
+                path: relativePath
+            };
+        } catch (error:any) {
+            console.log(error.message);
+            return undefined;
+        }
+        // return {
+        //     mapKey: filePath.replace(/\\/g, '/'),
+        //     content: require(filePath),
+        //     path: relativePath
+        // };
     }
 
     /** 过滤出 可被被加载的I18n.options配置 */
@@ -219,7 +237,15 @@ export function createI18nCommand() {
     }
 }
 
-
+function afterFileLoadGetDefaultReturn(moduleContext: ModuleContext){
+    if(moduleContext.exports.default) { // Esm
+        return moduleContext.exports.default; 
+    }else if(moduleContext.module.exports) { // CommondJs
+        return moduleContext.module.exports;
+    }else {
+        return moduleContext.exports;
+    }
+}
 /** 创建左下角图标 */
 function createStatusBarItem() {
     let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
