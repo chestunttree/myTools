@@ -1,12 +1,14 @@
 import * as TS from 'typescript';
+import type {LineAndCharacter, CompilerOptions, Node as TsNode} from 'typescript';
 import fs from "fs";
 import path from "path";
 import { getSourceFile } from './compile';
+// const TS = require('typescript');
 
 /** 解析ts代码， 传入特定属性值找到代码的位置（line，row） */
-export function findPropertyValuePosition(code: string, targetValue: string): TS.LineAndCharacter | null {
+export function findPropertyValuePosition(code: string, targetValue: string): LineAndCharacter | null {
   // 创建编译器选项
-  const compilerOptions: TS.CompilerOptions = {
+  const compilerOptions: CompilerOptions = {
     target: TS.ScriptTarget.ES2018,
     module: TS.ModuleKind.CommonJS
   };
@@ -14,10 +16,10 @@ export function findPropertyValuePosition(code: string, targetValue: string): TS
   // 分析源代码
   const sourceFile = getSourceFile(code)
 
-  let position: TS.LineAndCharacter | null = null;
+  let position: LineAndCharacter | null = null;
 
   // 递归遍历 AST
-  function visitNode(node: TS.Node): void {
+  function visitNode(node: TsNode): void {
     if (  TS.isPropertyAssignment(node)
           && (TS.isStringLiteral(node.initializer) || TS.isNumericLiteral(node.initializer))
           && node.initializer.text === targetValue
