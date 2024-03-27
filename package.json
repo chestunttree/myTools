@@ -2,7 +2,7 @@
   "name": "ctools",
   "displayName": "ctools",
   "description": "my tools ",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -68,8 +68,7 @@
     "@typescript-eslint/parser": "^7.0.2",
     "@vscode/test-cli": "^0.0.6",
     "@vscode/test-electron": "^2.3.9",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.3"
+    "eslint": "^8.56.0"
   },
   "dependencies": {
     "@babel/core": "^7.24.1",
@@ -81,6 +80,7 @@
     "@types/lodash": "^4.14.202",
     "@types/lodash-es": "^4.17.12",
     "lodash": "^4.17.21",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.21",
+    "typescript": "^5.3.3"
   }
 }
