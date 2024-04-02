@@ -113,26 +113,30 @@ export function createI18nCommand() {
     }
     /** 加载 i18n 配置文件 */
     async function readI18nOptionsfiles() {
-        if (statusBarItem) animateStatusBarItem(true);
-        const options = await getI18nOptionsConfiguration();
-        const loaderRes = await filterConfigI18nOptions(options);
-        if(!loaderRes.length) {
-            vscode.window.showErrorMessage('ctools.i18n.option 请配置有效路径', { title: 'Open Settings' })
-                .then(selection => {
-                    if (selection && selection.title === 'Open Settings') {
-                        vscode.commands.executeCommand('workbench.action.openSettings', 'ctools.i18n.options');
-                    }
-                });
-        } else {
-            loaderRes.forEach(({mapKey, content, path}) => i18nOptionsCatch.set(mapKey, {content, path}))
-            if (isFresh) {
-                isFresh = false;
-                vscode.window.showInformationMessage('i18n 配置加载完成!');
+        if (statusBarItem) updateStatusBarLoading(true);
+        try {
+            const options = await getI18nOptionsConfiguration();
+            const loaderRes = await filterConfigI18nOptions(options);
+            if(!loaderRes.length) {
+                vscode.window.showErrorMessage('ctools.i18n.option 请配置有效路径', { title: 'Open Settings' })
+                    .then(selection => {
+                        if (selection && selection.title === 'Open Settings') {
+                            vscode.commands.executeCommand('workbench.action.openSettings', 'ctools.i18n.options');
+                        }
+                    });
             } else {
-                vscode.window.showInformationMessage('i18n 配置已更新!');
+                loaderRes.forEach(({mapKey, content, path}) => i18nOptionsCatch.set(mapKey, {content, path}))
+                if (isFresh) {
+                    isFresh = false;
+                    vscode.window.showInformationMessage('i18n 配置加载完成!');
+                } else {
+                    vscode.window.showInformationMessage('i18n 配置已更新!');
+                }
             }
+            if (statusBarItem) updateStatusBarLoading(false);            
+        } catch (error) {
+            if (statusBarItem) updateStatusBarLoading(false);            
         }
-        if (statusBarItem) animateStatusBarItem(false);
     }
     /** 加载文件 */
     async function loaderFile(filePath: string, relativePath: string) {
@@ -208,7 +212,8 @@ export function createI18nCommand() {
             if (event.affectsConfiguration('ctools.i18n')) { readI18nOptionsfiles(); }
         });
     }
-    async function animateStatusBarItem(isRun: boolean) {
+    /**　i18n 配置加载状态 */
+    async function updateStatusBarLoading(isRun: boolean) {
         if (statusBarItemLoading !== undefined) clearTimeout(statusBarItemLoading);
         if (!isRun) return;
         let counter = 0;
