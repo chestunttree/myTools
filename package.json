@@ -23,10 +23,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "ctools.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "ctools.i18n",
         "title": "i18n start"
       },
