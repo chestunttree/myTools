@@ -1,7 +1,7 @@
 import * as TS from 'typescript';
 import type {LineAndCharacter, CompilerOptions, Node as TsNode} from 'typescript';
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 import { getSourceFile } from './compile';
 // const TS = require('typescript');
 

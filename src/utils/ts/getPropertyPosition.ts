@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 
 /** 解析ts代码， 传入特定属性名找到代码的位置（line，row） */
 export function findPropertyInCode(code: string, propertyName: string): ts.LineAndCharacter | null {
