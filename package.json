@@ -51,6 +51,7 @@
     }
   },
   "scripts": {
+    "publish": "vsce package",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
@@ -79,6 +80,7 @@
     "@babel/types": "^7.23.9",
     "@types/lodash": "^4.14.202",
     "@types/lodash-es": "^4.17.12",
+    "generator-code": "^1.8.5",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "typescript": "^5.3.3"
