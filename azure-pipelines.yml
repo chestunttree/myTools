@@ -17,5 +17,5 @@ steps:
 
 - script: |
     npm install
-    npm run publish
+    npx vsce package
   displayName: 'npm install and publish'
