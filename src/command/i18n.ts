@@ -5,11 +5,12 @@ import vm from 'vm';
 import { ayncReadFile, loadFile } from '../utils/fileLoad';
 import { createHover } from '../utils/hoverProvider';
 import { ModuleContext, NotUndefined, PickPromiseReturn } from '../type';
+import { CodeInlayHints } from '../i18n/inlayHintsProvider';
+import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
-export function createI18nCommand() {
+export function createI18nCommand(CTX: vscode.ExtensionContext) {
     let { i18nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
-    const i18nOptionsCatch = new Map<string, any>();
     let statusBarItem = createStatusBarItem();
     let statusBarItemLoading: NodeJS.Timeout;
     let isFresh = true;
@@ -57,7 +58,9 @@ export function createI18nCommand() {
                 i18nApiName = apiNameData.i18nApiName;
             }
         });
-        readI18nOptionsfiles();
+        readI18nOptionsfiles().then(()=>{
+            CTX.subscriptions.push(i18nCodeLens());
+        });
         vscode.window.showInformationMessage('mytools.i18n complete!');
     });
     const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh', () => {
@@ -67,7 +70,14 @@ export function createI18nCommand() {
         }
         readI18nOptionsfiles();
     });
-
+    /** 代码透镜 */
+    const i18nCodeLens = () => {
+        const codeLensDomSelector:vscode.DocumentSelector = {
+            pattern: '**/*.vue'
+        };
+        const inlayHintsProvider = new CodeInlayHints(i18nOptionsCatch);
+        return vscode.languages.registerInlayHintsProvider(codeLensDomSelector, inlayHintsProvider);
+    };
     /** i18n 调用代码块 hover Provide */
     const i18nProvide = vscode.languages.registerHoverProvider(languages, {
         provideHover(document, position, token) {
@@ -158,7 +168,7 @@ export function createI18nCommand() {
             const moduleContext:ModuleContext = { exports: {}, require, module:{exports: {}} };
             vm.runInNewContext(jsCode, moduleContext);
             const importedData = afterFileLoadGetDefaultReturn(moduleContext);
-            console.log(importedData, moduleContext);
+            // console.log(importedData, moduleContext);
             return {
                 mapKey: filePath.replace(/\\/g, '/'),
                 content: importedData,

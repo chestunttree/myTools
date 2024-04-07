@@ -11,7 +11,7 @@ const wrapParserRegExp = /\r\n/g;
 /** 查询 冒号前的属性名 */
 const objParamsRegExp = /[^,{]+(?=\:)/g;
 export async function ayncReadFile(path:string, relativePath:string){
-    console.log(path)
+    // console.log(path)
     await validFileAccess(path);
     const result = await readFile(path, {encoding:'utf8'});
     codeLineArr[relativePath] = codeStringParser(result);
