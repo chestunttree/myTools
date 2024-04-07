@@ -17,9 +17,7 @@
     "onLanguage:javascriptreact",
     "onLanguage:typescriptreact"
   ],
-  "enabledApiProposals": [
-    "telemetryLogger"
-  ],
+  "enabledApiProposals":[],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -30,6 +28,10 @@
       {
         "command": "ctools.i18n.refresh",
         "title": "i18n refresh"
+      },
+      {
+        "command": "ctools.i18n.codeLens",
+        "title": "i18n codeLens"
       }
     ],
     "configuration": {
