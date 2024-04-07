@@ -1,0 +1,1 @@
+export const i18nOptionsCatch = new Map<string, any>();

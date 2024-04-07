@@ -11,13 +11,13 @@ export default function(){
         return item;
     }) : [];
     /** 从匹配到的i18n调用代码中 获取code */
-	const i8nCodeRegExp = new RegExp(`(${i18nApiNameStrs?.join('|')})\\(['|"](.*?)['|"]\\)`, 'g');
+	const i18nCodeRegExp = new RegExp(`(${i18nApiNameStrs?.join('|')})\\(['|"](.*?)['|"]\\)`, 'g');
     /** 匹配代码中 调用额i18n的代码段 */
 	const i18nApiNameRegExp = new RegExp(`(${i18nApiNameStrs?.join('|')})\\('.*?'\\)`,'g');
 
     return {
         i18nApiName,
-        i8nCodeRegExp,
+        i18nCodeRegExp,
         i18nApiNameRegExp,
     }
 }
