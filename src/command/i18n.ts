@@ -29,7 +29,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                     }
                 });
         }
-        if (isI18nReay) { return vscode.window.showInformationMessage('mytools.i18n 已启动'); }
+        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }
         isI18nReay = true;
         /** 监听 Setting.json 和 i18n配置文件更新 */
         let changeFiles: string[] = [];
@@ -61,7 +61,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         readI18nOptionsfiles().then(()=>{
             CTX.subscriptions.push(i18nCodeLens());
         });
-        vscode.window.showInformationMessage('mytools.i18n complete!');
+        vscode.window.showInformationMessage('ctools.i18n complete!');
     });
     const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh', () => {
         if(!isI18nReay){
@@ -84,6 +84,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             if(!isI18nReay) return;
             const range = document.getWordRangeAtPosition(position, i18nApiNameRegExp);
             if (!range) { return Promise.reject(null); }
+            console.log(position, 'hover position')
             return new Promise((resolve, reject) => {
                 if (token.isCancellationRequested) {
                     reject(null);
