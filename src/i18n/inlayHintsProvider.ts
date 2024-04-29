@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import apiName from './apiName';
 import { isArray } from '../command/i18n';
 import { transformI18nCodeToMarkdown } from './hoverProvider';
 import { i18nOptionsCatch } from './i18nOptionsCatch';
+import apiName from '../utils/apiName';
 
 export class CodeInlayHints implements vscode.InlayHintsProvider {
-  constructor(public i18nOptionsCatch: Map<string, any>) { }
+  constructor(public _i18nOptionsCatch: Map<string, any>) { }
   provideInlayHints(document: vscode.TextDocument, range: vscode.Range, token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint[]> {
     let result: vscode.InlayHint[] = [];
     let { i18nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
@@ -62,6 +62,7 @@ export class CodeInlayHints implements vscode.InlayHintsProvider {
       // const text = document.getText(apiRange);
       // console.log(apiRange,text)
     };
+    console.log(result)
     return result;
   }
 }
