@@ -1,9 +1,5 @@
 import * as vscode from 'vscode';
 import path from 'path';
-import apiName from './apiName';
-import { createHover } from './hoverProvider';
-import { ayncReadFile } from './fileLoad';
-
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function i18nInit(context: vscode.ExtensionContext) {

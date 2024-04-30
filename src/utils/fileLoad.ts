@@ -80,6 +80,6 @@ async function transforEsmToCommodJS(code: string, filePath:string){
     const transformedCode = transformSync(code, {
         presets: [babelPresets]
     });
-    console.log(transformedCode);
+    // console.log(transformedCode);
     return transformedCode?.code;
 }

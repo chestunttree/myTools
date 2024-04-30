@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 
-	context.subscriptions.push(...createI18nCommand());
+	context.subscriptions.push(...createI18nCommand(context));
 }
 
 // This method is called when your extension is deactivated

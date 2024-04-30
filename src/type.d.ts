@@ -7,3 +7,7 @@ export type ModuleContext = {
     require: NodeRequire,
     module: { exports: any },
 }
+
+declare class CodeInlayHints {
+    constructor(i18nOptionsCatch:number);
+}

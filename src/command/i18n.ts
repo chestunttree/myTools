@@ -5,11 +5,13 @@ import vm from 'vm';
 import { ayncReadFile, loadFile } from '../utils/fileLoad';
 import { createHover } from '../utils/hoverProvider';
 import { ModuleContext, NotUndefined, PickPromiseReturn } from '../type';
+import { CodeInlayHints } from '../i18n/inlayHintsProvider';
+import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
+import { isDevMode } from '../utils/config';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
-export function createI18nCommand() {
+export function createI18nCommand(CTX: vscode.ExtensionContext) {
     let { i18nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
-    const i18nOptionsCatch = new Map<string, any>();
     let statusBarItem = createStatusBarItem();
     let statusBarItemLoading: NodeJS.Timeout;
     let isFresh = true;
@@ -18,7 +20,8 @@ export function createI18nCommand() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     /** 获取当前工作区路径 */
     const workspacePath = workspaceFolders ? workspaceFolders[0].uri.fsPath : '';
-    const i18nCommand = vscode.commands.registerCommand('ctools.i18n', () => {
+    
+    const handleI18nStart =  () => {
         if (!i18nApiName || !i18nApiName.length) {
             return vscode.window.showErrorMessage('ctools.i18n 失败启动：i18n.apiName配置不能为空', { title: 'Open Settings' })
                 .then(selection => {
@@ -28,52 +31,41 @@ export function createI18nCommand() {
                     }
                 });
         }
-        if (isI18nReay) { return vscode.window.showInformationMessage('mytools.i18n 已启动'); }
+        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }``
         isI18nReay = true;
-        /** 监听 Setting.json 和 i18n配置文件更新 */
-        let changeFiles: string[] = [];
-        vscode.workspace.onDidChangeTextDocument(event => {
-            const currentFileUri = event.document.uri.fsPath;
-            const i18noptionsFilePaths = [...i18nOptionsCatch.keys()];
-            if (!i18noptionsFilePaths.includes(currentFileUri.replace(/\\/g, '/'))) { return; }
-            if (!changeFiles.includes(currentFileUri)) {
-                changeFiles.push(currentFileUri);
-            }
+        afterI18nOptionsChange();
+        readI18nOptionsfiles().then(()=>{
+            CTX.subscriptions.push(i18nCodeLens());
         });
-        // 监听文件的保存
-        vscode.workspace.onDidSaveTextDocument(savedDocument => {
-            const saveFileUri = savedDocument.uri.fsPath;
-            if (changeFiles.includes(saveFileUri)) {
-                changeFiles = changeFiles.filter((i => i === saveFileUri));
-                readI18nOptionsfiles();
-            }
-        });
-        vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('ctools.i18n')) {
-                readI18nOptionsfiles();
-                const apiNameData = apiName();
-                i18nCodeRegExp = apiNameData.i18nCodeRegExp;
-                i18nApiNameRegExp = apiNameData.i18nApiNameRegExp;
-                i18nApiName = apiNameData.i18nApiName;
-            }
-        });
-        readI18nOptionsfiles();
-        vscode.window.showInformationMessage('mytools.i18n complete!');
-    });
-    const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh', () => {
+        vscode.window.showInformationMessage('ctools.i18n complete!');
+    }
+    const handleI18nRefresh = () => {
         if(!isI18nReay){
             vscode.commands.executeCommand('ctools.i18n');
             return;
         }
         readI18nOptionsfiles();
-    });
+    };
+    
+    const i18nCommand = vscode.commands.registerCommand('ctools.i18n',handleI18nStart);
+    const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh',handleI18nRefresh);
 
+    if(isDevMode(CTX.extensionMode)) handleI18nStart();
+    /** 代码透镜 */
+    const i18nCodeLens = () => {
+        const codeLensDomSelector:vscode.DocumentSelector = {
+            pattern: '**/*.vue'
+        };
+        const inlayHintsProvider = new CodeInlayHints(i18nOptionsCatch);
+        return vscode.languages.registerInlayHintsProvider(codeLensDomSelector, inlayHintsProvider);
+    };
     /** i18n 调用代码块 hover Provide */
     const i18nProvide = vscode.languages.registerHoverProvider(languages, {
         provideHover(document, position, token) {
             if(!isI18nReay) return;
             const range = document.getWordRangeAtPosition(position, i18nApiNameRegExp);
             if (!range) { return Promise.reject(null); }
+            console.log(position, 'hover position')
             return new Promise((resolve, reject) => {
                 if (token.isCancellationRequested) {
                     reject(null);
@@ -158,7 +150,7 @@ export function createI18nCommand() {
             const moduleContext:ModuleContext = { exports: {}, require, module:{exports: {}} };
             vm.runInNewContext(jsCode, moduleContext);
             const importedData = afterFileLoadGetDefaultReturn(moduleContext);
-            console.log(importedData, moduleContext);
+            // console.log(importedData, moduleContext);
             return {
                 mapKey: filePath.replace(/\\/g, '/'),
                 content: importedData,
@@ -189,8 +181,8 @@ export function createI18nCommand() {
     }
 
     function afterI18nOptionsChange() {
+        /** 监听 Setting.json 和 i18n配置文件更新 */
         let changeFiles: string[] = [];
-
         vscode.workspace.onDidChangeTextDocument(event => {
             const currentFileUri = event.document.uri.fsPath;
             const i18noptionsFilePaths = [...i18nOptionsCatch.keys()];
@@ -199,7 +191,6 @@ export function createI18nCommand() {
                 changeFiles.push(currentFileUri);
             }
         });
-
         // 监听文件的保存
         vscode.workspace.onDidSaveTextDocument(savedDocument => {
             const saveFileUri = savedDocument.uri.fsPath;
@@ -209,8 +200,15 @@ export function createI18nCommand() {
             }
         });
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('ctools.i18n')) { readI18nOptionsfiles(); }
+            if (event.affectsConfiguration('ctools.i18n')) {
+                readI18nOptionsfiles();
+                const apiNameData = apiName();
+                i18nCodeRegExp = apiNameData.i18nCodeRegExp;
+                i18nApiNameRegExp = apiNameData.i18nApiNameRegExp;
+                i18nApiName = apiNameData.i18nApiName;
+            }
         });
+
     }
     /**　i18n 配置加载状态 */
     async function updateStatusBarLoading(isRun: boolean) {
