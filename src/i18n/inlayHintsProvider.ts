@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { isArray } from '../command/i18n';
-import { transformI18nCodeToMarkdown } from './hoverProvider';
 import { i18nOptionsCatch } from './i18nOptionsCatch';
 import apiName from '../utils/apiName';
+import { TooltipMarkdown, transformI18nCodeText } from '../utils/hoverProvider';
 
 export class CodeInlayHints implements vscode.InlayHintsProvider {
   constructor(public _i18nOptionsCatch: Map<string, any>) { }
@@ -46,23 +46,20 @@ export class CodeInlayHints implements vscode.InlayHintsProvider {
         }, []);
 
       apiItem.forEach(({ range, text }) => {
-        console.log(text)
         let [i18nCode, i8nApiName] = text.replace(i18nCodeRegExp, '$2|$1').split('|'); ``
         const apiNameCheck = i18nApiName?.find((i) => isArray(i) && i8nApiName === i[0].replaceAll('/', ''));
         if (apiNameCheck) i18nCode = `${apiNameCheck[1]}.${i18nCode}`;
-        const toolsMkd = transformI18nCodeToMarkdown(i18nCode, i18nOptionsCatch);
-        console.log(toolsMkd);
+        const codeTextList = transformI18nCodeText(i18nCode, i18nOptionsCatch);
+        const toolsMkd = TooltipMarkdown(codeTextList);
         result.push({
-          label: toolsMkd,
+          label: codeTextList.map(([txt])=>txt).join(','),
           position: range.end,
           kind: vscode.InlayHintKind.Parameter,
+          // tooltip: toolsMkd[0]
         });
       })
-      // const apiRange = 
-      // const text = document.getText(apiRange);
-      // console.log(apiRange,text)
     };
-    console.log(result)
+    console.log(result);
     return result;
   }
 }

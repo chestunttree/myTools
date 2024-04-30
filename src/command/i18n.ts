@@ -7,6 +7,7 @@ import { createHover } from '../utils/hoverProvider';
 import { ModuleContext, NotUndefined, PickPromiseReturn } from '../type';
 import { CodeInlayHints } from '../i18n/inlayHintsProvider';
 import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
+import { isDevMode } from '../utils/config';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
@@ -19,7 +20,8 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     /** 获取当前工作区路径 */
     const workspacePath = workspaceFolders ? workspaceFolders[0].uri.fsPath : '';
-    const i18nCommand = vscode.commands.registerCommand('ctools.i18n', () => {
+    
+    const handleI18nStart =  () => {
         if (!i18nApiName || !i18nApiName.length) {
             return vscode.window.showErrorMessage('ctools.i18n 失败启动：i18n.apiName配置不能为空', { title: 'Open Settings' })
                 .then(selection => {
@@ -29,47 +31,26 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                     }
                 });
         }
-        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }
+        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }``
         isI18nReay = true;
-        /** 监听 Setting.json 和 i18n配置文件更新 */
-        let changeFiles: string[] = [];
-        vscode.workspace.onDidChangeTextDocument(event => {
-            const currentFileUri = event.document.uri.fsPath;
-            const i18noptionsFilePaths = [...i18nOptionsCatch.keys()];
-            if (!i18noptionsFilePaths.includes(currentFileUri.replace(/\\/g, '/'))) { return; }
-            if (!changeFiles.includes(currentFileUri)) {
-                changeFiles.push(currentFileUri);
-            }
-        });
-        // 监听文件的保存
-        vscode.workspace.onDidSaveTextDocument(savedDocument => {
-            const saveFileUri = savedDocument.uri.fsPath;
-            if (changeFiles.includes(saveFileUri)) {
-                changeFiles = changeFiles.filter((i => i === saveFileUri));
-                readI18nOptionsfiles();
-            }
-        });
-        vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('ctools.i18n')) {
-                readI18nOptionsfiles();
-                const apiNameData = apiName();
-                i18nCodeRegExp = apiNameData.i18nCodeRegExp;
-                i18nApiNameRegExp = apiNameData.i18nApiNameRegExp;
-                i18nApiName = apiNameData.i18nApiName;
-            }
-        });
+        afterI18nOptionsChange();
         readI18nOptionsfiles().then(()=>{
             CTX.subscriptions.push(i18nCodeLens());
         });
         vscode.window.showInformationMessage('ctools.i18n complete!');
-    });
-    const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh', () => {
+    }
+    const handleI18nRefresh = () => {
         if(!isI18nReay){
             vscode.commands.executeCommand('ctools.i18n');
             return;
         }
         readI18nOptionsfiles();
-    });
+    };
+    
+    const i18nCommand = vscode.commands.registerCommand('ctools.i18n',handleI18nStart);
+    const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh',handleI18nRefresh);
+
+    if(isDevMode(CTX.extensionMode)) handleI18nStart();
     /** 代码透镜 */
     const i18nCodeLens = () => {
         const codeLensDomSelector:vscode.DocumentSelector = {
@@ -200,8 +181,8 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     }
 
     function afterI18nOptionsChange() {
+        /** 监听 Setting.json 和 i18n配置文件更新 */
         let changeFiles: string[] = [];
-
         vscode.workspace.onDidChangeTextDocument(event => {
             const currentFileUri = event.document.uri.fsPath;
             const i18noptionsFilePaths = [...i18nOptionsCatch.keys()];
@@ -210,7 +191,6 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                 changeFiles.push(currentFileUri);
             }
         });
-
         // 监听文件的保存
         vscode.workspace.onDidSaveTextDocument(savedDocument => {
             const saveFileUri = savedDocument.uri.fsPath;
@@ -220,8 +200,15 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             }
         });
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('ctools.i18n')) { readI18nOptionsfiles(); }
+            if (event.affectsConfiguration('ctools.i18n')) {
+                readI18nOptionsfiles();
+                const apiNameData = apiName();
+                i18nCodeRegExp = apiNameData.i18nCodeRegExp;
+                i18nApiNameRegExp = apiNameData.i18nApiNameRegExp;
+                i18nApiName = apiNameData.i18nApiName;
+            }
         });
+
     }
     /**　i18n 配置加载状态 */
     async function updateStatusBarLoading(isRun: boolean) {
