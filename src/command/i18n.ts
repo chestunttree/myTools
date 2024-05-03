@@ -13,7 +13,6 @@ export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
     let { i18nCodeRegExp, i18nApiNameRegExp, i18nApiName } = apiName();
     let statusBarItem = createStatusBarItem();
-    let statusBarItemLoading: NodeJS.Timeout;
     let isFresh = true;
     let isI18nReay = false;
 
@@ -127,9 +126,13 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                     vscode.window.showInformationMessage('i18n 配置已更新!');
                 }
             }
-            if (statusBarItem) updateStatusBarLoading(false);            
+            if (statusBarItem) setTimeout(() => {
+                updateStatusBarLoading(false);
+            }, 500);            
         } catch (error) {
-            if (statusBarItem) updateStatusBarLoading(false);            
+            if (statusBarItem) setTimeout(() => {
+                updateStatusBarLoading(false);
+            }, 500);            
         }
     }
     /** 加载文件 */
@@ -148,11 +151,9 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         let jsCode:string;
         try {
             jsCode = await loadFile(filePath).then(res=>res||'');
-            // console.log(jsCode);
             const moduleContext:ModuleContext = { exports: {}, require, module:{exports: {}} };
             vm.runInNewContext(jsCode, moduleContext);
             const importedData = afterFileLoadGetDefaultReturn(moduleContext);
-            // console.log(importedData, moduleContext);
             return {
                 mapKey: filePath.replace(/\\/g, '/'),
                 content: importedData,
@@ -215,31 +216,11 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     }
     /**　i18n 配置加载状态 */
     async function updateStatusBarLoading(isRun: boolean) {
-        if (statusBarItemLoading !== undefined) clearTimeout(statusBarItemLoading);
-        if (!isRun) return;
-        let counter = 0;
-        statusBarItemLoading = setInterval(() => {
-            switch (counter % 4) {
-                case 0:
-                    statusBarItem.text = `$(sync~spin)`;
-                    break;
-
-                case 1:
-                    statusBarItem.text = `$(sync~spin)`;
-                    break;
-
-                case 2:
-                    statusBarItem.text = `$(sync~spin)`;
-                    break;
-
-                case 3:
-                    statusBarItem.text = `$(sync~spin)`;
-                    break;
-            }
-            statusBarItem.show();
-            counter++;
-        }, 200);
-
+        if (isRun){
+            statusBarItem.text = `$(sync~spin)`;
+        }else {
+            statusBarItem.text = `$(refresh)`;
+        }
     }
 }
 

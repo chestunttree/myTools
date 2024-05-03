@@ -23,12 +23,8 @@ export class CodeInlayHints implements vscode.InlayHintsProvider {
       // const currentPosition = new vscode.Position(line.lineNumber, range.end);
       // const apiRange = document.getWordRangeAtPosition(line.range.end, i18nApiNameRegExp);
       // const apiRange = document.getWordRangeAtPosition(line.range.end, i18nApiNameRegExp);
-      // console.log(document.getWordRangeAtPosition(line.range.end));
-      // console.log(line)
-      // console.log(apiRange,line.text.match(i18nApiNameRegExp));
       const checkApiStr = line.text.match(i18nApiNameRegExp);
       if (!checkApiStr) continue;
-      console.log(checkApiStr)
 
       const codePosition = checkApiStr.map((i) => {
         const txtIndexInLine = line.text.indexOf(i);
