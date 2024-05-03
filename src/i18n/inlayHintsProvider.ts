@@ -28,6 +28,7 @@ export class CodeInlayHints implements vscode.InlayHintsProvider {
       // console.log(apiRange,line.text.match(i18nApiNameRegExp));
       const checkApiStr = line.text.match(i18nApiNameRegExp);
       if (!checkApiStr) continue;
+      console.log(checkApiStr)
 
       const codePosition = checkApiStr.map((i) => {
         const txtIndexInLine = line.text.indexOf(i);
@@ -37,29 +38,30 @@ export class CodeInlayHints implements vscode.InlayHintsProvider {
       const apiItem = codePosition.reduce<{ range: vscode.Range, text: string }[]>(
         (result, itemP, index) => {
           if (!itemP) return result;
-          const currentRange = document.getWordRangeAtPosition(itemP);
+          const currentRange = document.getWordRangeAtPosition(itemP, i18nApiNameRegExp);
           if (!currentRange) return result;
           return [...result, {
-            range: currentRange,
+            /** 将文本插入到括号内 */
+            range: currentRange.with(undefined, new vscode.Position(itemP.line, currentRange.end.character-1)),
             text: checkApiStr[index]
           }];
         }, []);
 
       apiItem.forEach(({ range, text }) => {
-        let [i18nCode, i8nApiName] = text.replace(i18nCodeRegExp, '$2|$1').split('|'); ``
+        let [i18nCode, i8nApiName] = text.replace(i18nCodeRegExp, '$2|$1').split('|');
         const apiNameCheck = i18nApiName?.find((i) => isArray(i) && i8nApiName === i[0].replaceAll('/', ''));
         if (apiNameCheck) i18nCode = `${apiNameCheck[1]}.${i18nCode}`;
         const codeTextList = transformI18nCodeText(i18nCode, i18nOptionsCatch);
         const toolsMkd = TooltipMarkdown(codeTextList);
         result.push({
+          // label: codeTextList[0][0],
           label: codeTextList.map(([txt])=>txt).join(','),
           position: range.end,
           kind: vscode.InlayHintKind.Parameter,
           // tooltip: toolsMkd[0]
         });
-      })
+      });
     };
-    console.log(result);
     return result;
   }
 }

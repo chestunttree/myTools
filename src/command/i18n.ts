@@ -31,7 +31,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                     }
                 });
         }
-        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }``
+        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }
         isI18nReay = true;
         afterI18nOptionsChange();
         readI18nOptionsfiles().then(()=>{
@@ -65,7 +65,6 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             if(!isI18nReay) return;
             const range = document.getWordRangeAtPosition(position, i18nApiNameRegExp);
             if (!range) { return Promise.reject(null); }
-            console.log(position, 'hover position')
             return new Promise((resolve, reject) => {
                 if (token.isCancellationRequested) {
                     reject(null);
@@ -117,7 +116,10 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                         }
                     });
             } else {
-                loaderRes.forEach(({mapKey, content, path}) => i18nOptionsCatch.set(mapKey, {content, path}))
+                /**
+                 * 这里在配置文件更新后 仅set加载后的新值
+                 */
+                loaderRes.forEach(({mapKey, content, path, modeName}) => i18nOptionsCatch.set(mapKey, {content, path, modeName}))
                 if (isFresh) {
                     isFresh = false;
                     vscode.window.showInformationMessage('i18n 配置加载完成!');
@@ -131,7 +133,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         }
     }
     /** 加载文件 */
-    async function loaderFile(filePath: string, relativePath: string) {
+    async function loaderFile(filePath: string, relativePath: string, modeName: string) {
         try {
             filePath = await ayncReadFile(filePath, relativePath);
             // delete require.cache[require.resolve(filePath)];
@@ -154,7 +156,8 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             return {
                 mapKey: filePath.replace(/\\/g, '/'),
                 content: importedData,
-                path: relativePath
+                path: relativePath,
+                modeName,
             };
         } catch (error:any) {
             console.log(error.message);
@@ -173,7 +176,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         const loaders:ReturnType<typeof loaderFile>[] = [];
         for (let languagesItem in options) {
             const filePath = path.resolve(workspacePath, options[languagesItem]);
-            loaders.push((loaderFile(filePath, options[languagesItem])))
+            loaders.push((loaderFile(filePath, options[languagesItem], languagesItem)))
         }
         const loadersRes = await Promise.all(loaders);
         const r = loadersRes.filter(Boolean) as FilterI18nReturn;
