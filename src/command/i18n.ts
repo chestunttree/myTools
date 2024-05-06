@@ -8,6 +8,8 @@ import { ModuleContext, NotUndefined, PickPromiseReturn } from '../type';
 import { CodeInlayHints } from '../i18n/inlayHintsProvider';
 import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 import { isDevMode } from '../utils/config';
+import { getI18nOptionsConfiguration } from '../i18n';
+import { link } from 'fs';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
@@ -47,9 +49,19 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         }
         readI18nOptionsfiles();
     };
+    const handleI18nCodeLensCheckMode = async () => {
+        const options = await getI18nOptionsConfiguration();
+        let codeLensMode = vscode.workspace.getConfiguration('ctools.i18n.codeLens').get('mode');
+        console.log(Object.keys(options));
+        if(!options) return;
+        const optionList = Object.keys(options).map(code => ({code, link: options[code]}));
+        if(!codeLensMode) codeLensMode = optionList[0].code;
+        
+    }
     
     const i18nCommand = vscode.commands.registerCommand('ctools.i18n',handleI18nStart);
     const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh',handleI18nRefresh);
+    const i18nCodeLensCheckModeCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.checkMode', handleI18nCodeLensCheckMode);
 
     if(isDevMode(CTX.extensionMode)) handleI18nStart();
     /** 代码透镜 */
@@ -79,28 +91,8 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         }
     });
 
-    return [i18nCommand, i18nRefreshCommand, statusBarItem, i18nProvide];
+    return [i18nCommand, i18nRefreshCommand, i18nCodeLensCheckModeCommand, statusBarItem, i18nProvide];
 
-    async function getI18nOptionsConfiguration() {
-        let config = vscode.workspace.getConfiguration('ctools.i18n');
-        let options = config.get<Record<string, string>>('options');
-        const validateOptions = options && isObj(options) && Object.keys(options).length > 0;
-        let errorMessage = '';
-        if (!Boolean(options)) { errorMessage = 'i18n 配置文件路径未设置: ctools.i18n.options'; }
-        if (!isObj(options)) { errorMessage = 'ctools.i18n.option默认类型为Object: { [语言]: [配置文件路径] }'; }
-        if (!(options && Object.keys(options).length > 0)) { errorMessage = 'ctools.i18n.option不能为空对象'; }
-        if (!validateOptions) {
-            vscode.window.showErrorMessage(errorMessage, { title: 'Open Settings' })
-                .then(selection => {
-                    if (selection && selection.title === 'Open Settings') {
-                        vscode.commands.executeCommand('workbench.action.openSettings', 'ctools.i18n.options');
-                    }
-                });
-            return Promise.reject('fails');
-        } else {
-            return options;
-        }
-    }
     /** 加载 i18n 配置文件 */
     async function readI18nOptionsfiles() {
         if (statusBarItem) updateStatusBarLoading(true);
@@ -192,7 +184,6 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             const i18noptionsFilePaths = [...i18nOptionsCatch.keys()];
             if (!i18noptionsFilePaths.includes(currentFileUri.replace(/\\/g, '/'))) { return; }
             if (!changeFiles.includes(currentFileUri)) {
-                changeFiles.push(currentFileUri);
             }
         });
         // 监听文件的保存
@@ -204,7 +195,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             }
         });
         vscode.workspace.onDidChangeConfiguration(event => {
-            if (event.affectsConfiguration('ctools.i18n')) {
+            if (event.affectsConfiguration('ctools.i18n.apiName') || event.affectsConfiguration('ctools.i18n.options')) {
                 readI18nOptionsfiles();
                 const apiNameData = apiName();
                 i18nCodeRegExp = apiNameData.i18nCodeRegExp;
@@ -219,7 +210,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         if (isRun){
             statusBarItem.text = `$(sync~spin)`;
         }else {
-            statusBarItem.text = `$(refresh)`;
+            statusBarItem.text = `$(comment-discussion)`;
         }
     }
 }
@@ -236,7 +227,7 @@ function afterFileLoadGetDefaultReturn(moduleContext: ModuleContext){
 /** 创建左下角图标 */
 function createStatusBarItem() {
     let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    statusBarItem.text = `$(refresh)`; // 使用内置的图标
+    statusBarItem.text = `$(comment-discussion)`; // 使用内置的图标
     statusBarItem.tooltip = 'Refresh I18n cache';
     statusBarItem.command = 'ctools.i18n.refresh'; // 当点击图标时执行的命令
     statusBarItem.show(); // 让状态栏项显示出来

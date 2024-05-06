@@ -32,6 +32,10 @@
       {
         "command": "ctools.i18n.codeLens",
         "title": "i18n codeLens"
+      },
+      {
+        "command": "ctools.i18n.codeLens.checkMode",
+        "title": "i18n codeLens check mode"
       }
     ],
     "configuration": {
@@ -48,6 +52,10 @@
             "$tc"
           ],
           "description": "i18n方法名: 类似$t, 方法名有特殊字符的需要加上转义符=> '\\\\$t'"
+        },
+        "ctools.i18n.codeLens.mode": {
+          "type": "string",
+          "description": "i18n codeLens 模式，对应 ctools.i18n.options中的选项"
         }
       }
     }
