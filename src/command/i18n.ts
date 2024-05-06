@@ -30,13 +30,15 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                     }
                 });
         }
-        if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }
+        if (isI18nReay) { return vscode.window.setStatusBarMessage('ctools.i18n 已启动', 2000); }
+        // if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }
         isI18nReay = true;
         afterI18nOptionsChange();
         readI18nOptionsfiles().then(()=>{
             CTX.subscriptions.push(i18nCodeLens());
         });
-        vscode.window.showInformationMessage('ctools.i18n complete!');
+        // vscode.window.showInformationMessage('ctools.i18n complete!');
+        // vscode.window.setStatusBarMessage('ctools.i18n complete!', 2000)
     }
     const handleI18nRefresh = () => {
         if(!isI18nReay){
@@ -121,9 +123,9 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                 loaderRes.forEach(({mapKey, content, path, modeName}) => i18nOptionsCatch.set(mapKey, {content, path, modeName}))
                 if (isFresh) {
                     isFresh = false;
-                    vscode.window.showInformationMessage('i18n 配置加载完成!');
+                    vscode.window.setStatusBarMessage('i18n 配置加载完成!', 2000);
                 } else {
-                    vscode.window.showInformationMessage('i18n 配置已更新!');
+                    vscode.window.setStatusBarMessage('i18n 配置已更新!', 2000);
                 }
             }
             if (statusBarItem) setTimeout(() => {
