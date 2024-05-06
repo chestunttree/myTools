@@ -54,9 +54,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     if(isDevMode(CTX.extensionMode)) handleI18nStart();
     /** 代码透镜 */
     const i18nCodeLens = () => {
-        const codeLensDomSelector:vscode.DocumentSelector = {
-            pattern: '**/*.vue'
-        };
+        const codeLensDomSelector:vscode.DocumentSelector = languages;
         const inlayHintsProvider = new CodeInlayHints(i18nOptionsCatch);
         return vscode.languages.registerInlayHintsProvider(codeLensDomSelector, inlayHintsProvider);
     };
