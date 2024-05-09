@@ -44,6 +44,10 @@
       {
         "command": "ctools.i18n.codeLens.close",
         "title": "i18n codeLens close"
+      },
+      {
+        "command": "ctools.i18n.codeLens.search",
+        "title": "i18n codeLens search"
       }
     ],
     "menus": {
@@ -55,6 +59,10 @@
         {
           "command": "ctools.i18n.codeLens.checkMode",
           "when": "codeLensCommandCheck"
+        },
+        {
+          "command": "ctools.i18n.codeLens.search",
+          "when": "codeLensCommandSearch"
         },
         {
           "command": "ctools.i18n.refresh",

@@ -20,7 +20,7 @@ export function transformI18nCodeText(code: string, i18nOptionsCatch:Map<string,
     return codeTextList;
 }
 
-export function TooltipMarkdown(codeTextList: ReturnType<typeof transformI18nCodeText>) {
+export function TooltipMarkdown(codeTextList: ReturnType<typeof transformI18nCodeText> ) {
     return codeTextList.map(([codeText,fileLink])=>new vscode.MarkdownString(`<font size=2>${codeText}</font> <font color=#0000ff size=1>${fileLink}</font>`));
 }
 

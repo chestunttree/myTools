@@ -4,12 +4,13 @@ import path from 'path';
 import vm from 'vm';
 import { ayncReadFile, loadFile } from '../utils/fileLoad';
 import { createHover } from '../utils/hoverProvider';
-import { ModuleContext, NotUndefined, PickPromiseReturn } from '../type';
+import type { ModuleContext, NotUndefined, PickPromiseReturn, SelectCodeLensModeItem } from '../type';
 import { CodeInlayHints } from '../i18n/inlayHintsProvider';
 import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 import { isDevMode } from '../utils/config';
 import { getI18nOptionsConfiguration } from '../i18n';
 import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose } from '../utils/context';
+import { selectCodeLensMode } from '../i18n/quickPick';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
@@ -53,14 +54,17 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     const handleI18nCodeLensCheckMode = async () => {
         const options = await getI18nOptionsConfiguration();
         const codeLensConfig = vscode.workspace.getConfiguration('ctools.i18n.codeLens');
-        let codeLensMode = codeLensConfig.get('mode');
+        let codeLensMode = codeLensConfig.get<string>('mode');
         if(!options) return;
-        const optionList = Object.keys(options).map(code => ({code, link: options[code]}));
+        const optionList:SelectCodeLensModeItem[] = Object.keys(options).map(code => ({code, link: options[code]}));
         if(!codeLensMode) {
             codeLensMode = optionList[0].code;
             /**　考虑到可能用户设置到空间 默认放在工作空间维度下  */
             codeLensConfig.update('mode', codeLensMode, vscode.ConfigurationTarget.Workspace);
+            return;
         };
+        codeLensMode = await selectCodeLensMode(optionList);
+        codeLensConfig.update('mode', codeLensMode, vscode.ConfigurationTarget.Workspace);
     };
     const handleI18nCodeLensStart = async () => {
         codeLensProvider = i18nCodeLens();
@@ -76,12 +80,19 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         hideCodeLensCheckCommandDispose();
         showCodeLensStartCommandDispose();
     };
+    // const handleI18nCodeLensSearch = async () => {
+    //     const searchText = await vscode.window.showInputBox({
+    //         placeHolder: '输入要搜索的内容（翻译的文本）'
+    //     });
+    //     vscode.commands.executeCommand('vscode.executeWorkspaceSymbolProvider', )
+    // };
     
     const i18nCommand = vscode.commands.registerCommand('ctools.i18n',handleI18nStart);
     const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh',handleI18nRefresh);
     const i18nCodeLensCheckModeCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.checkMode', handleI18nCodeLensCheckMode);
     const i18nCodeLensStartCommand = vscode.commands.registerCommand('ctools.i18n.codeLens', handleI18nCodeLensStart);
     const i18nCodeLensHideCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.close', handleI18nCodeLensHide);
+    // const i18nCodeLensSearchCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.search', handleI18nCodeLensSearch);
 
     if(isDevMode(CTX.extensionMode)) handleI18nStart();
     /** 代码透镜 */
@@ -117,6 +128,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             i18nCodeLensCheckModeCommand,
             i18nCodeLensStartCommand,
             i18nCodeLensHideCommand,
+            // i18nCodeLensSearchCommand,
             statusBarItem,
             i18nProvide,
         ];

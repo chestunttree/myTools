@@ -11,3 +11,9 @@ export type ModuleContext = {
 declare class CodeInlayHints {
     constructor(i18nOptionsCatch:number);
 }
+
+export type SelectCodeLensModeItem = {
+    code: string;
+    link: string;
+}
+
