@@ -36,8 +36,32 @@
       {
         "command": "ctools.i18n.codeLens.checkMode",
         "title": "i18n codeLens check mode"
+      },
+      {
+        "command": "ctools.i18n.codeLens",
+        "title": "i18n codeLens start"
+      },
+      {
+        "command": "ctools.i18n.codeLens.close",
+        "title": "i18n codeLens close"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ctools.i18n.codeLens.close",
+          "when": "codeLensCommandClose"
+        },
+        {
+          "command": "ctools.i18n.codeLens.checkMode",
+          "when": "codeLensCommandCheck"
+        },
+        {
+          "command": "ctools.i18n.refresh",
+          "when": "i18nCommandRefresh"
+        }
+      ]
+    },
     "configuration": {
       "title": "ctools",
       "properties": {
@@ -56,6 +80,11 @@
         "ctools.i18n.codeLens.mode": {
           "type": "string",
           "description": "i18n codeLens 模式，对应 ctools.i18n.options中的选项"
+        },
+        "ctools.i18n.codeLens.auto": {
+          "type": "boolean",
+          "default": true,
+          "description": "i18n codeLens 是否自动启动（当i18n启动时）"
         }
       }
     }

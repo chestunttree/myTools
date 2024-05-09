@@ -13,16 +13,6 @@ export class CodeInlayHints implements vscode.InlayHintsProvider {
       let line = document.lineAt(i);
       /** 排除空白行 */
       if (line.isEmptyOrWhitespace) continue;
-      // if (line.text.includes('=')) {
-      //   result.push({
-      //     label: 'Inlay Hint',
-      //     position: line.range.end,
-      //     kind: vscode.InlayHintKind.Parameter,
-      //   });
-      // }
-      // const currentPosition = new vscode.Position(line.lineNumber, range.end);
-      // const apiRange = document.getWordRangeAtPosition(line.range.end, i18nApiNameRegExp);
-      // const apiRange = document.getWordRangeAtPosition(line.range.end, i18nApiNameRegExp);
       const checkApiStr = line.text.match(i18nApiNameRegExp);
       if (!checkApiStr) continue;
 

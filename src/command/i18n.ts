@@ -9,7 +9,7 @@ import { CodeInlayHints } from '../i18n/inlayHintsProvider';
 import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 import { isDevMode } from '../utils/config';
 import { getI18nOptionsConfiguration } from '../i18n';
-import { link } from 'fs';
+import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose } from '../utils/context';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
@@ -17,6 +17,8 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     let statusBarItem = createStatusBarItem();
     let isFresh = true;
     let isI18nReay = false;
+    /** 代码透镜Provider */
+    let codeLensProvider: vscode.Disposable | null;
 
     const workspaceFolders = vscode.workspace.workspaceFolders;
     /** 获取当前工作区路径 */
@@ -33,15 +35,14 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
                 });
         }
         if (isI18nReay) { return vscode.window.setStatusBarMessage('ctools.i18n 已启动', 2000); }
-        // if (isI18nReay) { return vscode.window.showInformationMessage('ctools.i18n 已启动'); }
         isI18nReay = true;
         afterI18nOptionsChange();
-        readI18nOptionsfiles().then(()=>{
-            CTX.subscriptions.push(i18nCodeLens());
+        readI18nOptionsfiles()
+        .then(()=>{
+            const isCodeLensAuto = vscode.workspace.getConfiguration('ctools.i18n.codeLens').get('auto');
+            if(isCodeLensAuto) handleI18nCodeLensStart();
         });
-        // vscode.window.showInformationMessage('ctools.i18n complete!');
-        // vscode.window.setStatusBarMessage('ctools.i18n complete!', 2000)
-    }
+    };
     const handleI18nRefresh = () => {
         if(!isI18nReay){
             vscode.commands.executeCommand('ctools.i18n');
@@ -51,17 +52,36 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     };
     const handleI18nCodeLensCheckMode = async () => {
         const options = await getI18nOptionsConfiguration();
-        let codeLensMode = vscode.workspace.getConfiguration('ctools.i18n.codeLens').get('mode');
-        console.log(Object.keys(options));
+        const codeLensConfig = vscode.workspace.getConfiguration('ctools.i18n.codeLens');
+        let codeLensMode = codeLensConfig.get('mode');
         if(!options) return;
         const optionList = Object.keys(options).map(code => ({code, link: options[code]}));
-        if(!codeLensMode) codeLensMode = optionList[0].code;
-        
-    }
+        if(!codeLensMode) {
+            codeLensMode = optionList[0].code;
+            /**　考虑到可能用户设置到空间 默认放在工作空间维度下  */
+            codeLensConfig.update('mode', codeLensMode, vscode.ConfigurationTarget.Workspace);
+        };
+    };
+    const handleI18nCodeLensStart = async () => {
+        codeLensProvider = i18nCodeLens();
+        showCodeLensCloseCommandDispose();
+        showCodeLensCheckCommandDispose();
+        hideCodeLensStartCommandDispose();
+        CTX.subscriptions.push(codeLensProvider);
+    };
+    const handleI18nCodeLensHide = () => {
+        codeLensProvider?.dispose();
+        codeLensProvider = null;
+        hideCodeLensCloseCommandDispose();
+        hideCodeLensCheckCommandDispose();
+        showCodeLensStartCommandDispose();
+    };
     
     const i18nCommand = vscode.commands.registerCommand('ctools.i18n',handleI18nStart);
     const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh',handleI18nRefresh);
     const i18nCodeLensCheckModeCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.checkMode', handleI18nCodeLensCheckMode);
+    const i18nCodeLensStartCommand = vscode.commands.registerCommand('ctools.i18n.codeLens', handleI18nCodeLensStart);
+    const i18nCodeLensHideCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.close', handleI18nCodeLensHide);
 
     if(isDevMode(CTX.extensionMode)) handleI18nStart();
     /** 代码透镜 */
@@ -91,7 +111,15 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         }
     });
 
-    return [i18nCommand, i18nRefreshCommand, i18nCodeLensCheckModeCommand, statusBarItem, i18nProvide];
+    return [
+            i18nCommand,
+            i18nRefreshCommand,
+            i18nCodeLensCheckModeCommand,
+            i18nCodeLensStartCommand,
+            i18nCodeLensHideCommand,
+            statusBarItem,
+            i18nProvide,
+        ];
 
     /** 加载 i18n 配置文件 */
     async function readI18nOptionsfiles() {
@@ -135,11 +163,6 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         } catch (error) {
             return undefined;            
         }
-        // console.log(relativePath, filePath, filePath.replace(/\\/g, '/'));
-        // i18nOptionsCatch.set(filePath.replace(/\\/g, '/'), {
-        //     content: require(filePath),
-        //     path: relativePath
-        // });
         let jsCode:string;
         try {
             jsCode = await loadFile(filePath).then(res=>res||'');
@@ -156,11 +179,6 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             console.log(error.message);
             return undefined;
         }
-        // return {
-        //     mapKey: filePath.replace(/\\/g, '/'),
-        //     content: require(filePath),
-        //     path: relativePath
-        // };
     }
 
     /** 过滤出 可被被加载的I18n.options配置 */
