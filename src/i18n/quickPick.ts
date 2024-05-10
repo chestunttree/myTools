@@ -8,7 +8,10 @@ export async function selectCodeLensMode(selectItems: SelectCodeLensModeItem[]) 
 
 export async function selectCToolsCommand() {
     // const quickPick = await vscode.window.showQuickPick()
+    console.log(getExecutableCommands());
 }
 
 // export function ctoolsCommand
-//createQuickPick
+const getExecutableCommands = () => vscode.extensions.getExtension('chestunttree.ctools');
+
+// const commandSelect = vscode.window.createQuickPick()

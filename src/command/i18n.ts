@@ -10,7 +10,7 @@ import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 import { isDevMode } from '../utils/config';
 import { getI18nOptionsConfiguration } from '../i18n';
 import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose } from '../utils/context';
-import { selectCodeLensMode } from '../i18n/quickPick';
+import { selectCToolsCommand, selectCodeLensMode } from '../i18n/quickPick';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
@@ -44,6 +44,9 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
             if(isCodeLensAuto) handleI18nCodeLensStart();
         });
     };
+    const handleI18nRunCommands = () => {
+        selectCToolsCommand();
+    }
     const handleI18nRefresh = () => {
         if(!isI18nReay){
             vscode.commands.executeCommand('ctools.i18n');
@@ -87,6 +90,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     //     vscode.commands.executeCommand('vscode.executeWorkspaceSymbolProvider', )
     // };
     
+    const i18nCommandPick = vscode.commands.registerCommand('ctools.i18n.commands',handleI18nRunCommands);
     const i18nCommand = vscode.commands.registerCommand('ctools.i18n',handleI18nStart);
     const i18nRefreshCommand = vscode.commands.registerCommand('ctools.i18n.refresh',handleI18nRefresh);
     const i18nCodeLensCheckModeCommand = vscode.commands.registerCommand('ctools.i18n.codeLens.checkMode', handleI18nCodeLensCheckMode);
@@ -124,6 +128,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
 
     return [
             i18nCommand,
+            i18nCommandPick,
             i18nRefreshCommand,
             i18nCodeLensCheckModeCommand,
             i18nCodeLensStartCommand,
@@ -239,8 +244,10 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     async function updateStatusBarLoading(isRun: boolean) {
         if (isRun){
             statusBarItem.text = `$(sync~spin)`;
+            statusBarItem.command = undefined;
         }else {
             statusBarItem.text = `$(comment-discussion)`;
+            statusBarItem.command = 'ctools.i18n.commands';
         }
     }
 }
@@ -259,7 +266,7 @@ function createStatusBarItem() {
     let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     statusBarItem.text = `$(comment-discussion)`; // 使用内置的图标
     statusBarItem.tooltip = 'Refresh I18n cache';
-    statusBarItem.command = 'ctools.i18n.refresh'; // 当点击图标时执行的命令
+    statusBarItem.command = 'ctools.i18n.commands'; // 当点击图标时执行的命令
     statusBarItem.show(); // 让状态栏项显示出来
     return statusBarItem;
 }

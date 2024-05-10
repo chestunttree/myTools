@@ -22,6 +22,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "ctools.i18n.commands",
+        "title": "i18n run command"
+      },
+      {
         "command": "ctools.i18n",
         "title": "i18n start"
       },
