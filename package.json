@@ -42,10 +42,6 @@
         "title": "i18n codeLens check mode"
       },
       {
-        "command": "ctools.i18n.codeLens",
-        "title": "i18n codeLens start"
-      },
-      {
         "command": "ctools.i18n.codeLens.close",
         "title": "i18n codeLens close"
       },
