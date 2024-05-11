@@ -45,7 +45,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         });
     };
     const handleI18nRunCommands = () => {
-        selectCToolsCommand();
+        selectCToolsCommand(CTX);
     }
     const handleI18nRefresh = () => {
         if(!isI18nReay){

@@ -23,11 +23,13 @@
     "commands": [
       {
         "command": "ctools.i18n.commands",
-        "title": "i18n run command"
+        "title": "i18n run command",
+        "category": "i18n run"
       },
       {
         "command": "ctools.i18n",
-        "title": "i18n start"
+        "title": "i18n start",
+        "category": "i18n"
       },
       {
         "command": "ctools.i18n.refresh",
@@ -35,15 +37,18 @@
       },
       {
         "command": "ctools.i18n.codeLens",
-        "title": "i18n codeLens"
+        "title": "i18n codeLens",
+        "category": "codeLens"
       },
       {
         "command": "ctools.i18n.codeLens.checkMode",
-        "title": "i18n codeLens check mode"
+        "title": "i18n codeLens check mode",
+        "category": "codeLens check"
       },
       {
         "command": "ctools.i18n.codeLens.close",
-        "title": "i18n codeLens close"
+        "title": "i18n codeLens close",
+        "category": "codeLens close"
       },
       {
         "command": "ctools.i18n.codeLens.search",

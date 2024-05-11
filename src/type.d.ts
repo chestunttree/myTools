@@ -18,6 +18,20 @@ export type SelectCodeLensModeItem = {
 }
 
 export interface SelectCommandItem {
-    command: string,
+    command: string
     rule?: string
+    remark?: string
+    /** 分类用的图标 */
+    groupIcon?: string
+    /** 分割线 */
+    divider?: boolean
+}
+
+/**　extension.packageJSON.contributes 类型 */
+export namespace Contributes {
+    /**　packageJSON中的command */
+    type commands<T extends object = {}> = T & {
+        command: string,
+        title: string,
+    }
 }
