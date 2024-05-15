@@ -1,3 +1,6 @@
+import type {QuickPickItem} from 'vscode'
+import { CommandPick } from './utils/enum';
+
 export type PickPromiseReturn<P> = P extends Promise<infer T> ? T : P;
 
 export type NotUndefined<T> = T extends undefined ? never : T;
@@ -17,15 +20,22 @@ export type SelectCodeLensModeItem = {
     link: string;
 }
 
-export interface SelectCommandItem {
-    command: string
+/** select pick 选项 */
+interface SelectCommandItemBase {
     rule?: string
     remark?: string
     /** 分类用的图标 */
     groupIcon?: string
     /** 分割线 */
-    divider?: boolean
 }
+interface commandItemPick { type: CommandPick.commandItem, command: string, rule: string }
+interface DividerItemPick { type: CommandPick.divider }
+interface ModeItemPick {
+    type: CommandPick.modeItem,
+    options: () => Promise<QuickPickItem[]>
+}
+export type SelectCommandItem = commandItemPick | DividerItemPick | ModeItemPick
+
 
 /**　extension.packageJSON.contributes 类型 */
 export namespace Contributes {
