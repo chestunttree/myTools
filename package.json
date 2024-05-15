@@ -58,20 +58,24 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "ctools.i18n.codeLens",
+          "when": "ctools.codeLensCommandStart"
+        },
+        {
           "command": "ctools.i18n.codeLens.close",
-          "when": "codeLensCommandClose"
+          "when": "ctools.codeLensCommandClose"
         },
         {
           "command": "ctools.i18n.codeLens.checkMode",
-          "when": "codeLensCommandCheck"
+          "when": "ctools.codeLensCommandCheck"
         },
         {
           "command": "ctools.i18n.codeLens.search",
-          "when": "codeLensCommandSearch"
+          "when": "ctools.codeLensCommandSearch"
         },
         {
           "command": "ctools.i18n.refresh",
-          "when": "i18nCommandRefresh"
+          "when": "ctools.i18nCommandRefresh"
         }
       ]
     },

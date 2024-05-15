@@ -4,46 +4,59 @@ import * as vscode from 'vscode';
 
 /** 展示　codeLens.start 命令 */
 export const showCodeLensStartCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'codeLensCommandStart', true);
+  globalContext.setContext('ctools.codeLensCommandStart', true);
 };
 /**　隐藏　codeLens.start 命令 */
 export const hideCodeLensStartCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'codeLensCommandStart', false);
+  globalContext.setContext('ctools.codeLensCommandStart', false);
 };
 
 /** 展示　codeLens.Check 命令 */
 export const showCodeLensCheckCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'codeLensCommandCheck', true);
+  globalContext.setContext('ctools.codeLensCommandCheck', true);
 };
 /**　隐藏　codeLens.Check 命令 */
 export const hideCodeLensCheckCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'codeLensCommandCheck', false);
+  globalContext.setContext('ctools.codeLensCommandCheck', false);
 };
 
 /** 展示　codeLens.close 命令 */
 export const showCodeLensCloseCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'codeLensCommandClose', true);
+  globalContext.setContext('ctools.codeLensCommandClose', true);
 };
 /**　隐藏　codeLens.close 命令 */
 export const hideCodeLensCloseCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'codeLensCommandClose', false);
+  globalContext.setContext('ctools.codeLensCommandClose', false);
 };
 
 /** 展示　i18nTools.close 命令 */
 export const showI18nCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'i18nCommandClose', true);
+  globalContext.setContext('ctools.i18nCommandClose', true);
 };
 /**　隐藏　i18nTools.close 命令 */
 export const hideI18nCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'i18nCommandClose', false);
+  globalContext.setContext('ctools.i18nCommandClose', false);
 };
 
 /** 展示　i18nTools.refresh 命令 */
 export const showI18nRefreshCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'i18nCommandRefresh', true);
+  globalContext.setContext('ctools.i18nCommandRefresh', true);
 };
 /**　隐藏　i18nTools.refresh 命令 */
 export const hideI18nRefreshCommandDispose = () => {
-  vscode.commands.executeCommand('setContext', 'i18nCommandRefresh', false);
+  globalContext.setContext('ctools.i18nCommandRefresh', false);
 };
 
+class ExtensionContext {
+  private commands = new Map();
+  setContext(contextId:string, value: boolean|string ) {
+    this.commands.set(contextId, value);
+    vscode.commands.executeCommand('setContext', contextId, value);
+  }
+  getContext<T extends boolean | string = boolean>(contextId:string){
+    if(!this.commands.has(contextId)) return undefined;
+    return this.commands.get(contextId) as T;
+  }
+  
+}
+export const globalContext = new ExtensionContext();

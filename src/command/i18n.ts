@@ -9,7 +9,7 @@ import { CodeInlayHints } from '../i18n/inlayHintsProvider';
 import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 import { isDevMode } from '../utils/config';
 import { getI18nOptionsConfiguration } from '../i18n';
-import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose } from '../utils/context';
+import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose, showI18nRefreshCommandDispose } from '../utils/context';
 import { selectCToolsCommand, selectCodeLensMode } from '../i18n/quickPick';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
@@ -40,6 +40,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         afterI18nOptionsChange();
         readI18nOptionsfiles()
         .then(()=>{
+            showI18nRefreshCommandDispose();
             const isCodeLensAuto = vscode.workspace.getConfiguration('ctools.i18n.codeLens').get('auto');
             if(isCodeLensAuto) handleI18nCodeLensStart();
         });
