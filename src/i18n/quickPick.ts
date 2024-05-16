@@ -26,7 +26,7 @@ const codeLensPickList = async () => {
         ayncReadFile(pathResolveOfWorkspace(url))
             .then(() => option).catch(() => undefined)
     for (let i in i18nOptions) {
-        modePickList.push(i18noptionsUrlAccess({ label: i, description: CODE_MODE_CHECK, picked: currentMode === i }, i18nOptions[i]))
+        modePickList.push(i18noptionsUrlAccess({ label: i, description: CODE_MODE_CHECK, iconPath: currentMode === i ? new vscode.ThemeIcon('check') : undefined }, i18nOptions[i]))
     }
     const isNotUndefined = <T>(v: T | undefined): v is T => Boolean(v)
     const results = await Promise.all(modePickList);
@@ -85,6 +85,7 @@ const runPickResultCommand = (pickResult?: vscode.QuickPickItem) => {
     if (description === CODE_MODE_CHECK && label) {
         const codeLensConfig = vscode.workspace.getConfiguration('ctools.i18n.codeLens');
         codeLensConfig.update('mode', label, vscode.ConfigurationTarget.Workspace);
+        vscode.commands.executeCommand('ctools.i18n.codeLens');
     }
     if (detail) vscode.commands.executeCommand(detail);
 }

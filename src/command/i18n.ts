@@ -66,13 +66,20 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
         };
         codeLensMode = await selectCodeLensMode(optionList);
         codeLensConfig.update('mode', codeLensMode, vscode.ConfigurationTarget.Workspace);
+        handleI18nCodeLensStart()
     };
     const handleI18nCodeLensStart = async () => {
-        codeLensProvider = i18nCodeLens();
-        showCodeLensCloseCommandDispose();
-        showCodeLensCheckCommandDispose();
-        hideCodeLensStartCommandDispose();
-        CTX.subscriptions.push(codeLensProvider);
+        if(codeLensProvider) {
+            codeLensProvider?.dispose();
+            codeLensProvider = null;
+        }
+        setTimeout(()=>{
+            codeLensProvider = i18nCodeLens();
+            showCodeLensCloseCommandDispose();
+            showCodeLensCheckCommandDispose();
+            hideCodeLensStartCommandDispose();
+            CTX.subscriptions.push(codeLensProvider);
+        }, 500)
     };
     const handleI18nCodeLensHide = () => {
         codeLensProvider?.dispose();
