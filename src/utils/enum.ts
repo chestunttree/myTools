@@ -7,3 +7,5 @@ export enum CommandPick {
   /** 模式选择 */
   modeItem = "modeItem"
 }
+
+export const CODE_MODE_CHECK = 'CodeLens mode';

@@ -28,14 +28,13 @@ interface SelectCommandItemBase {
     groupIcon?: string
     /** 分割线 */
 }
-interface commandItemPick { type: CommandPick.commandItem, command: string, rule: string }
-interface DividerItemPick { type: CommandPick.divider }
-interface ModeItemPick {
+export interface commandItemPick extends SelectCommandItemBase { type: CommandPick.commandItem, command: string, rule: string }
+export interface DividerItemPick extends SelectCommandItemBase { type: CommandPick.divider }
+export interface ModeItemPick extends SelectCommandItemBase {
     type: CommandPick.modeItem,
     options: () => Promise<QuickPickItem[]>
 }
 export type SelectCommandItem = commandItemPick | DividerItemPick | ModeItemPick
-
 
 /**　extension.packageJSON.contributes 类型 */
 export namespace Contributes {

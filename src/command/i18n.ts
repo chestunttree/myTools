@@ -11,6 +11,7 @@ import { isDevMode } from '../utils/config';
 import { getI18nOptionsConfiguration } from '../i18n';
 import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose, showI18nRefreshCommandDispose } from '../utils/context';
 import { selectCToolsCommand, selectCodeLensMode } from '../i18n/quickPick';
+import { pathResolveOfWorkspace } from '../utils/workspace';
 
 export const languages = ['javascript', 'typescript', 'vue', 'javascriptreact', 'typescriptreact'];
 export function createI18nCommand(CTX: vscode.ExtensionContext) {
@@ -20,10 +21,6 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     let isI18nReay = false;
     /** 代码透镜Provider */
     let codeLensProvider: vscode.Disposable | null;
-
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    /** 获取当前工作区路径 */
-    const workspacePath = workspaceFolders ? workspaceFolders[0].uri.fsPath : '';
     
     const handleI18nStart =  () => {
         if (!i18nApiName || !i18nApiName.length) {
@@ -176,7 +173,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     /** 加载文件 */
     async function loaderFile(filePath: string, relativePath: string, modeName: string) {
         try {
-            filePath = await ayncReadFile(filePath, relativePath);
+            filePath = await ayncReadFile(filePath);
             // delete require.cache[require.resolve(filePath)];
         } catch (error) {
             return undefined;            
@@ -204,7 +201,7 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     async function filterConfigI18nOptions(options: PickPromiseReturn<ReturnType<typeof getI18nOptionsConfiguration>>) {
         const loaders:ReturnType<typeof loaderFile>[] = [];
         for (let languagesItem in options) {
-            const filePath = path.resolve(workspacePath, options[languagesItem]);
+            const filePath = pathResolveOfWorkspace(options[languagesItem]);
             loaders.push((loaderFile(filePath, options[languagesItem], languagesItem)))
         }
         const loadersRes = await Promise.all(loaders);

@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
-import { Contributes, SelectCodeLensModeItem, SelectCommandItem } from '../type';
+import { Contributes, ModeItemPick, SelectCodeLensModeItem, SelectCommandItem } from '../type';
 import { globalContext } from '../utils/context';
-import { CommandPick } from '../utils/enum';
+import { CODE_MODE_CHECK, CommandPick } from '../utils/enum';
+import { ayncReadFile } from '../utils/fileLoad';
+import { pathResolveOfWorkspace } from '../utils/workspace';
 
 export async function selectCodeLensMode(selectItems: SelectCodeLensModeItem[]) {
     const quickPick = await vscode.window.showQuickPick(selectItems.map(({ code }) => code));
@@ -18,12 +20,17 @@ export async function selectCToolsCommand(CTX: vscode.ExtensionContext) {
 const codeLensPickList = async () => {
     const i18nOptions = vscode.workspace.getConfiguration('ctools.i18n').get<Record<string, string>>('options');
     const currentMode = vscode.workspace.getConfiguration('ctools.i18n.codeLens').get('mode');
-    const modePickList: vscode.QuickPickItem[] = [];
-    if (!i18nOptions) return modePickList;
+    const modePickList: Promise<vscode.QuickPickItem | undefined>[] = [];
+    if (!i18nOptions) return [];
+    const i18noptionsUrlAccess = (option: vscode.QuickPickItem, url: string) =>
+        ayncReadFile(pathResolveOfWorkspace(url))
+            .then(() => option).catch(() => undefined)
     for (let i in i18nOptions) {
-        modePickList.push({ label: i, description: 'CodeLens mode', picked: currentMode === i })
+        modePickList.push(i18noptionsUrlAccess({ label: i, description: CODE_MODE_CHECK, picked: currentMode === i }, i18nOptions[i]))
     }
-    return modePickList;
+    const isNotUndefined = <T>(v: T | undefined): v is T => Boolean(v)
+    const results = await Promise.all(modePickList);
+    return results.filter(isNotUndefined);
 }
 /**　命令下拉框 选项 */
 const selectCommandItems: SelectCommandItem[] = [
@@ -44,7 +51,8 @@ const getExecutableCommands = async (CTX: vscode.ExtensionContext) => {
     if (!extension) return undefined;
     const packageCommands: Contributes.commands[] = extension.packageJSON.contributes.commands;
     const commandsMap = packageCommands.reduce<Record<string, Contributes.commands>>((resMap, item) => ({ ...resMap, [item.command]: item }), {});
-    const commandsItems = selectCommandItems.reduce<vscode.QuickPickItem[]>(function (list, item) {
+    let modePickList: Promise<vscode.QuickPickItem[]>[] = [];
+    const baseCommandsItems = selectCommandItems.reduce<vscode.QuickPickItem[]>(function (list, item) {
         const { type } = item;
         /**　分割线 */
         if (type === CommandPick.divider) return [...list, { label: '', kind: vscode.QuickPickItemKind.Separator }];
@@ -54,12 +62,14 @@ const getExecutableCommands = async (CTX: vscode.ExtensionContext) => {
             if (!isCommandPickShow(rule)) return list;
             return [...list, createPickItem(commandsMap, command)];
         }
-        const dividerPick: vscode.QuickPickItem = { label: '', kind: vscode.QuickPickItemKind.Separator }
-        const modeItem = await item.options()
-        return [...list, dividerPick, ...modeItem];
+        modePickList.push(item.options());
+        return list;
     }, []);
+    const modePickItems = await Promise.all(modePickList)
+    const commandsItems = [...baseCommandsItems, ...modePickItems.flat(2)]
     return commandsItems;
 };
+
 /**　检查命令在Context是否被标记为隐藏  */
 const isCommandPickShow = (rule: string) => !rule || globalContext.getContext('ctools.' + rule);
 const createPickItem = (commandsMap: Record<string, Contributes.commands>, command: string, other?: Omit<vscode.QuickPickItem, 'label' | 'detail'>) => {
@@ -71,7 +81,10 @@ const createPickItem = (commandsMap: Record<string, Contributes.commands>, comma
 /** 执行command下拉 选中后的命令 */
 const runPickResultCommand = (pickResult?: vscode.QuickPickItem) => {
     if (!pickResult) return;
-    const { detail } = pickResult;
-    if (!detail) return;
-    vscode.commands.executeCommand(detail);
+    const { detail, description, label } = pickResult;
+    if (description === CODE_MODE_CHECK && label) {
+        const codeLensConfig = vscode.workspace.getConfiguration('ctools.i18n.codeLens');
+        codeLensConfig.update('mode', label, vscode.ConfigurationTarget.Workspace);
+    }
+    if (detail) vscode.commands.executeCommand(detail);
 }

@@ -20,7 +20,7 @@ const astMap = new Map<string,parser.ParseResult<File>>();
 const wrapParserRegExp = /\r\n/g;
 /** 查询 冒号前的属性名 */
 const objParamsRegExp = /[^,{]+(?=\:)/g;
-export async function ayncReadFile(path:string, relativePath:string) {
+export async function ayncReadFile(path:string) {
     const extension = getFileExtension(path);
     if(!extension) path = await filePathFormat(path);
     await access(path);
