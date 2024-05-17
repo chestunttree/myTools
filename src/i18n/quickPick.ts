@@ -5,6 +5,9 @@ import { CODE_MODE_CHECK, CommandPick } from '../utils/enum';
 import { ayncReadFile } from '../utils/fileLoad';
 import { pathResolveOfWorkspace } from '../utils/workspace';
 
+const checkedIcon = new vscode.ThemeIcon('lens-choose');
+const chooseIcon = new vscode.ThemeIcon('debug-breakpoint-unverified')
+
 export async function selectCodeLensMode(selectItems: SelectCodeLensModeItem[]) {
     const quickPick = await vscode.window.showQuickPick(selectItems.map(({ code }) => code));
     return quickPick;
@@ -26,7 +29,11 @@ const codeLensPickList = async () => {
         ayncReadFile(pathResolveOfWorkspace(url))
             .then(() => option).catch(() => undefined)
     for (let i in i18nOptions) {
-        modePickList.push(i18noptionsUrlAccess({ label: i, description: CODE_MODE_CHECK, iconPath: currentMode === i ? new vscode.ThemeIcon('check') : undefined }, i18nOptions[i]))
+        modePickList.push(i18noptionsUrlAccess({
+            label: i,
+            description: CODE_MODE_CHECK,
+            iconPath: currentMode === i ? checkedIcon : chooseIcon
+        },i18nOptions[i]))
     }
     const isNotUndefined = <T>(v: T | undefined): v is T => Boolean(v)
     const results = await Promise.all(modePickList);
@@ -65,8 +72,10 @@ const getExecutableCommands = async (CTX: vscode.ExtensionContext) => {
         modePickList.push(item.options());
         return list;
     }, []);
-    const modePickItems = await Promise.all(modePickList)
-    const commandsItems = [...baseCommandsItems, ...modePickItems.flat(2)]
+    const modePickListResult = await Promise.all(modePickList);
+    const modePickItems = modePickListResult.flat(2);
+    const modePickDivider:vscode.QuickPickItem = {label: 'codeLens mode check', kind: vscode.QuickPickItemKind.Separator}
+    const commandsItems = [...baseCommandsItems, modePickDivider, ...modePickItems]
     return commandsItems;
 };
 

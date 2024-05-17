@@ -104,6 +104,22 @@
           "description": "i18n codeLens 是否自动启动（当i18n启动时）"
         }
       }
+    },
+    "icons": {
+      "lens-choose": {
+          "description": "choose icon",
+          "default": {
+              "fontPath": "./public/icons.woff",
+              "fontCharacter": "\\ea01"
+          }
+      },
+      "lens-unchoose": {
+          "description": "unchoose icon",
+          "default": {
+              "fontPath": "./public/icons.woff",
+              "fontCharacter": "\\ea02"
+          }
+      }
     }
   },
   "scripts": {
