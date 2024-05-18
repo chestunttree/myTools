@@ -27,7 +27,7 @@ const codeLensPickList = async () => {
     if (!i18nOptions) return [];
     const i18noptionsUrlAccess = (option: vscode.QuickPickItem, url: string) =>
         ayncReadFile(pathResolveOfWorkspace(url))
-            .then(() => option).catch(() => undefined)
+            .then(() => option).catch(() => undefined);
     for (let i in i18nOptions) {
         modePickList.push(i18noptionsUrlAccess({
             label: i,

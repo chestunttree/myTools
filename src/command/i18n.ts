@@ -9,7 +9,7 @@ import { CodeInlayHints } from '../i18n/inlayHintsProvider';
 import { i18nOptionsCatch } from '../i18n/i18nOptionsCatch';
 import { isDevMode } from '../utils/config';
 import { getI18nOptionsConfiguration } from '../i18n';
-import { hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose, showI18nRefreshCommandDispose } from '../utils/context';
+import { globalContext, hideCodeLensCheckCommandDispose, hideCodeLensCloseCommandDispose, hideCodeLensStartCommandDispose, showCodeLensCheckCommandDispose, showCodeLensCloseCommandDispose, showCodeLensStartCommandDispose, showI18nRefreshCommandDispose } from '../utils/context';
 import { selectCToolsCommand, selectCodeLensMode } from '../i18n/quickPick';
 import { pathResolveOfWorkspace } from '../utils/workspace';
 
@@ -45,12 +45,14 @@ export function createI18nCommand(CTX: vscode.ExtensionContext) {
     const handleI18nRunCommands = () => {
         selectCToolsCommand(CTX);
     }
-    const handleI18nRefresh = () => {
+    const handleI18nRefresh = async () => {
         if(!isI18nReay){
             vscode.commands.executeCommand('ctools.i18n');
             return;
         }
-        readI18nOptionsfiles();
+        await readI18nOptionsfiles();
+        const isCodeLensOpen = globalContext.getContext('ctools.codeLensCommandCheck');
+        if(isCodeLensOpen) handleI18nCodeLensStart();
     };
     const handleI18nCodeLensCheckMode = async () => {
         const options = await getI18nOptionsConfiguration();
