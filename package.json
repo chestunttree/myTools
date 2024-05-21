@@ -3,7 +3,7 @@
   "publisher": "chestunttree",
   "displayName": "ctools",
   "description": "my tools ",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "engines": {
     "vscode": "^1.54.0"
   },
