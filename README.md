@@ -45,12 +45,12 @@ Initial release
 ### 0.2.0
 
 加入`ctools.i18n.codeLens`相关功能，即**翻译提示文本块**,可根据配置的codeLens Mode展示代码对应的翻译,通过`i18n codeLens check mode`设置展示对应的翻译模块
-    ![alt text](image2.png)
+    ![alt text](https://raw.githubusercontent.com/chestunttree/resource/main/ctools-plugin/image2.png)
 ### 0.2.1
 
 * 修复 `ctools.i18n.codeLens`重复加载渲染的问题
 * 加入`ctools.i18n.commands`快捷命令列表
-    ![alt text](image1.png)
+    ![alt text](https://raw.githubusercontent.com/chestunttree/resource/main/ctools-plugin/image1.png)
 
 优化i18n.options配置读取
 * 文件路径后缀自动获取匹配 `.js`,`.ts`,`.json`
