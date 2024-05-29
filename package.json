@@ -3,7 +3,8 @@
   "publisher": "chestunttree",
   "displayName": "ctools",
   "description": "my tools ",
-  "version": "0.2.4",
+  "icon": "public/logo.png",
+  "version": "0.2.5",
   "engines": {
     "vscode": "^1.54.0"
   },
